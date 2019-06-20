@@ -1,6 +1,6 @@
-function [DigitalOutput] = ADC(sample_cycle_ratio,Full_Scale,num_bits)
+function [DigitalOutput,sample_times] = ADC(sample_cycle_ratio,Full_Scale,num_bits)
 
-Ts = 1;
+Ts = 1; % Elongate number of samples
 samples = sample_cycle_ratio*Ts; %MIGHT SCALE BY NUMBER OF CYCLES
 k = linspace(0,Ts,samples); % sample points
 FS = 2^num_bits;
@@ -11,8 +11,8 @@ D = zeros(1,samples);
 
 D = round((FS/2).*sin(2*pi*k));
 DigitalOutput = (D.*Full_Scale)/(2^num_bits); %scaling to full scale
-
-%test
+multiplier = 1:samples;
+sample_times = multiplier.*k;
 
 plot(k,DigitalOutput);
 end
