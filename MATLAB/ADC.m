@@ -12,5 +12,7 @@ D = zeros(1,samples);
 D = round((FS/2).*sin(2*pi*k));
 DigitalOutput = (D.*Full_Scale)/(2^num_bits); %scaling to full scale
 
+%test
+
 plot(k,DigitalOutput);
 end
