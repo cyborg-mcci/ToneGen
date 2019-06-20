@@ -1,7 +1,7 @@
 function [DigitalOutput,sample_times] = ADC(sample_cycle_ratio,Full_Scale,num_bits)
 
-Ts = 1; % Elongate number of samples
-samples = sample_cycle_ratio*Ts; %MIGHT SCALE BY NUMBER OF CYCLES
+Ts = 1; 
+samples = sample_cycle_ratio*Ts; 
 k = linspace(0,Ts,samples); % sample points
 FS = 2^num_bits;
 

@@ -21,26 +21,12 @@
 %ADC
 % [D,t] = ADC(1000,2,5);
 
-% A = [1 2 3];
-% B = repmat(A,1,3);
-% block = size(A,2);
-% n = 3;
-% samples = 10;
-% t = zeros(1,n*samples);
-% for counter = 1:n
-% unit = A(block);
-% t = A*counter*unit;
-% end
+n = 3;
+A = [1 2 3];
+unit = size(A,2);
+B = repmat(A,1,n);
 
-[S,t] = StitchedArray(1000,2,5);
-
-
-
-
-
-
-
-    
+for b 
 
 
 
