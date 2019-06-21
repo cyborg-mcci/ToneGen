@@ -16,6 +16,7 @@
 function [snr, enob, pot_signal_B, f, PSD] = gs_fresp(x, N, fs, fi, OSR)
 
 %%%%Frequency response of a real signal%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+global FigureCounter;
 FigureCounter = 0;
 ventana=hann(N,'periodic');                  %Window for the data.   %%%blackmanharris
 win_data=x.*ventana;                         %Windowed data.
