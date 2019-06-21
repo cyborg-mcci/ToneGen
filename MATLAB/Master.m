@@ -23,7 +23,7 @@
 %% Initialisation Section
 
 clearvars -EXCEPT nch pch
-global ON OFF s FigureCounter T kb fmin fmax FreqPoints wmax wmin w_test f;
+global ON OFF s FigureCounter f;
 
 ON = 1;
 OFF = 0;
@@ -34,6 +34,7 @@ FigureCounter = 0;
 
 maxNumCompThreads(12);
 
+%% Parameter Declaration
 sample_cycle_ratio = 1021;
 Full_Scale = 2;
 num_bits = 16;
