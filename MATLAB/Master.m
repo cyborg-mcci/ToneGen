@@ -17,9 +17,4 @@ N = floor(y);
 
 [snr, enob, pot_signal_B, f, PSD] = gs_fresp(Stitched_TArray, 2^N, fs, fi, OSR);
 
-
-
-
-
-
 % [Stitched_Array, time_series] = StitchedArray(Dig_Array,sample_cycle_ratio,Full_Scale,num_bits);
