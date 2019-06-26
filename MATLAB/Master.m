@@ -56,6 +56,7 @@ plot(Stitched_TArray,Stitched_DArray);
 grid on
 
 
+<<<<<<< HEAD
 OSR=1;
 L = length(Stitched_TArray);
 y = log2(L);
@@ -74,11 +75,28 @@ SDA = Stitched_DArray(1:2^N)';
 =======
 =======
 >>>>>>> parent of 7d8c2e9... Including basic filter test
+=======
+% OSR=1;
+% L = length(Stitched_TArray);
+% y = log2(L);
+% N = floor(y);
+% 
+% M = 59;
+% cycinsample = Stitched_TArray(end)*f_in;
+% numdatapts = length(Stitched_TArray);
+% fs = f_in*2^N/41; %%%%%%%% fi/fs = #cyclesperwindow/#dataptsperwindow
+% 
+% SDA = Stitched_DArray(1:2^N)';
+
+>>>>>>> parent of 7d8c2e9... Including basic filter test
 fs=f_in/sample_cycle_ratio;
 OSR=1;
 
 [snr, enob, pot_signal_B, f, PSD] = gs_fresp(Dig_Out', N, fs, f_in, OSR);
 <<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> parent of 7d8c2e9... Including basic filter test
+=======
 >>>>>>> parent of 7d8c2e9... Including basic filter test
 =======
 >>>>>>> parent of 7d8c2e9... Including basic filter test
