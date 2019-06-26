@@ -67,14 +67,20 @@ cycinsample = Stitched_TArray(end)*f_in;
 numdatapts = length(Stitched_TArray);
 fs = f_in*2^N/41; %%%%%%%% fi/fs = #cyclesperwindow/#dataptsperwindow
 
+<<<<<<< HEAD
 SDA = Stitched_DArray(1:2^N)';
 
 [snr, enob, pot_signal_B, f, PSD] = gs_fresp(SDA, 2^N, fs, fi, OSR);
 =======
+=======
+>>>>>>> parent of 7d8c2e9... Including basic filter test
 fs=f_in/sample_cycle_ratio;
 OSR=1;
 
 [snr, enob, pot_signal_B, f, PSD] = gs_fresp(Dig_Out', N, fs, f_in, OSR);
+<<<<<<< HEAD
+>>>>>>> parent of 7d8c2e9... Including basic filter test
+=======
 >>>>>>> parent of 7d8c2e9... Including basic filter test
 
 % num = [5];
