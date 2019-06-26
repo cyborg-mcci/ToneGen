@@ -1,7 +1,0 @@
-MC = 41;
-M = 2048;
-
-fs = 1000;
-fin = fs * (MC/M);
-
-t = linspace(
