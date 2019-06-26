@@ -69,10 +69,7 @@ OSR=1;
 
 [snr, enob, pot_signal_B, f, PSD] = gs_fresp(Dig_Out', N, fs, f_in, OSR);
 
-f1 = 10e6 - 50;
-f2 = 10e6 + 50;
-y = bandpass(Dig_Out',[f1 f2]);
-semilogx(f,y);
+enob
 % num = [5];
 % den = [1];
 % t = Stitched_TArray(1:length(Stitched_DArray));
