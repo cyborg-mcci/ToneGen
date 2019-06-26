@@ -24,7 +24,7 @@ spectrum=2*fft(win_data)/(sum(ventana));     %FFT Single side.
 psd=10*log10(abs(spectrum.^2));              %PowerSpectralDensity.
 FigureCounter = FigureCounter + 1;
 figure(FigureCounter);
-plot([0:N/2-1].*(fs/N), psd(1:N/2)); %Plotting options
+semilogx([0:N/2-1].*(fs/N), psd(1:N/2)); %Plotting options
 xlabel('Frequency, Hz','FontSize',14)        %Plotting options  
 ylabel('PSD, dB','FontSize',14)              %Plotting options 
 set(gca,'FontSize',14)                       %Plotting options
