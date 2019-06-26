@@ -1,4 +1,4 @@
-%Pure sine wave PSD%%
+Pure sine wave PSD%%
 t = linspace(0,2*pi,1200);
 f_in = 1e6;
 i =sin(2*pi*f_in.*t);
