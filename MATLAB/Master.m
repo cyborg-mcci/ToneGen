@@ -122,6 +122,9 @@ SDA = Stitched_DArray(1:2^N)';
 [snr, enob, pot_signal_B, f, PSD] = gs_fresp(SDA, 2^N, fs, fi, OSR);
 >>>>>>> parent of baa07cb... fixed FFT
 
+[snr, enob, pot_signal_B, f, PSD] = gs_fresp(Dig_Out', N, fs, f_in, OSR);
+
+enob
 % num = [5];
 % den = [1];
 % t = Stitched_TArray(1:length(Stitched_DArray));
