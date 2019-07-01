@@ -1,0 +1,11 @@
+function FlickerNoise = FlickerNoise(kf,Sampling_Frequency,Time_Vector)
+
+fnoise = 2*pi*kf.*randn(1,length(Time_Vector));
+TF = tf(1,[1 0]);
+S = lsim(TF,fnoise,Time_Vector);
+i_fnoise = sqrt(abs(S));
+
+[Pxx, w] = periodogram(i_fnoise,[],[],Sampling_Frequency,'onesided');
+FlickerNoise = sqrt(Pxx);
+
+end
