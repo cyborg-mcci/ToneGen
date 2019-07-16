@@ -36,36 +36,44 @@ maxNumCompThreads(12);
 
 %% Parameter Declaration
 
-MC=41;
-N=16384;
-sample_cycle_ratio = MC/N;
-Full_Scale = 2;
-num_bits = 12;
-f_in = 1e6;
+NumBits = 12;
+MC = 41;
+NumSamples = 8192;
+FullScale = 2;
+f_in = 1e4;
+fs = f_in*NumSamples/MC;
 
-[Dig_Out,Time_Out] = ADC(sample_cycle_ratio,Full_Scale,num_bits, MC);
-Normalised_time = Time_Out.*(1/f_in); % normalising time series
+%%%% DAC
+FcornerDAC = 1e3;
+DAC_ThermalN = 1e-11;
+[DAC_Output,Normalised_Time,DAC_Noise] = DAC(FcornerDAC,FullScale,MC,NumBits,NumSamples,DAC_ThermalN);
+Time = Normalised_Time/f_in;
 
-fs=f_in/sample_cycle_ratio;
-OSR=1;
-% [snr, enob, pot_signal_B, f, PSD] = gs_fresp(Dig_Out', N, fs, f_in, OSR);
+%%%%Attenuator
+Divider = 2;
+FCorner_Att =1e3;
+Att_ThermalN = 1e-12;
+[AttOutput,Att_Noise] = Attenuator(DAC_Output,Divider,FCorner_Att,Att_ThermalN);
 
-R = 1e3;
-T = 293.15;
-kf = 1;
-fmin = 0;
-fmax = 10^7;
-FreqRange = linspace(fmin,fmax,length(Dig_Out));
+%%%%Filter
+Filter_TNoise = 1e-12;
+FCornerFilter = 1e8;
+TFnum = 1;
+TFden = [1e-4 1]; %fc = 1.6kHz
+Filtered_Att = Filtering(TFnum,TFden,AttOutput,Time,FCornerFilter,Filter_TNoise);
 
-DACThermalNoise = RThermal_Noise(R,T,length(Dig_Out));
-DACFlickerNoise = FlickerNoise(kf,FreqRange,length(Dig_Out));
-DACNoise = sqrt(DACThermalNoise.^2 + DACFlickerNoise.^2);
+p1 = subplot(3,1,1);
+plot(Time,DAC_Output)
+title('DAC')
+p2 = subplot(3,1,2);
+plot(Time,AttOutput)
+title('Attenuator')
+p3 = subplot(3,1,3);
+plot(Time,Filtered_Att)
+title('Filtered')
+linkaxes([p1,p2,p3],'xy');
 
-DAC_Output = Dig_Out + DACNoise;
-
-
-
-
+% [snr, enob, pot_signal_B, f, PSD] = gs_fresp(Filtered_Att', length(Filtered_Att), fs, f_in,1);
 
 
 

@@ -1,113 +1,47 @@
-%Pure sine wave PSD
+%Testing space for ToneGen
 
-% t = linspace(0,2*pi,1200);
-% f_in = 1e6;
-% i =sin(2*pi*f_in.*t);
-% n = floor(log2(length(t)));
-% SCR = 1000;
-% i = i(1:2^n)';
-% fs = 2^n*f_in/53;
-% [snr, enob, pot_signal_B, f, PSD] = gs_fresp(i, 2^n, fs,f_in , 1);
+NumBits = 12;
+MC = 41;
+NumSamples = 8192;
+FullScale = 2;
+f_in = 1e4;
+fs = f_in*NumSamples/MC;
+sample_cycle_ratio = MC/NumSamples;
 
+%ADC
+% [DO,T] = ADC(sample_cycle_ratio,FullScale,NumBits, MC);
+% plot(T,DO);
+% title('Digital Output vs Normalised time');
+% xlabel('Time (s)');
+% ylabel('Digital Output');
 
-
-%ADC and Stitched Array%
-
-% [DO,ST] = ADC(1000,2,12);
-% [SA, STA] = StitchedArray(DO,ST);
-
-
-
-%LSIM%
-
-% TF = tf([1],[1 1]);
-% t = linspace(-10,10,1001);
-% x = 5*ones(1,length(t));
-% y = 5*(1-exp(-t));
-% 
-% y = lsim(TF,x,t);
-% plot(t,y);
+% [snrADC, enobADC, pot_signal_B_ADC, f, PSDADC] = gs_fresp(DO', length(DO), fs, f_in,1);
 
 
 
-%Filtering%
-
-% f_in = 1e3;
-% [i,t] = gensig('sin',1/f_in);
-% 
-% R = 1e3;
-% C = 1e-7; %fc = 1.6kHz
-% TFnum = [1];
-% TFden = [R*C 1];
-% TF = tf(TFnum, TFden);
-% y = Filtering(TFnum, TFden, i, t);
-% plot(t,i);
-% hold on
-% plot(t,y);
-% grid on
+%DACNoise
+% FCornerDAC = 1e4;
+% TNoiseDAC = 1e-11;
+% [DAC_Out,DAC_T,DACNoise] = DAC(FCornerDAC,FullScale,MC,NumBits,NumSamples,TNoiseDAC);
+% Time = DAC_T/f_in;
+% % DAC Noise PSD
+% [snrDAC, enobDAC, pot_signal_B_DAC, f, PSDDAC] = gs_fresp(DACNoise', length(DACNoise), fs, f_in,1);
 
 
+%Attenuator Noise PSDDivider = 2;
+% FCorner_Att = 1e5;
+% TNoise_Att = 1e-9;
+% [Attenuator_Output,Att_Noise]  = Attenuator(DAC_Out,Divider,FCorner_Att,TNoise_Att);
+% [snrAtt, enobAtt, pot_signal_B_Att, f, PSDAtt] = gs_fresp(Att_Noise', length(Attenuator_Output), fs, f_in,1);
 
 
-%Noise%
-
-% t = linspace(0,2*pi,1200);
-% f_in = 1e6;
-% i =sin(2*pi*f_in.*t);
-
-% r_th = RThermal_Noise(R,T,length(i));
-
-% t = linspace(0,2*pi,16384);
-% f_in = 1e2;
-% i =sin(2*pi*f_in.*t);
-% R = 1e3;
-% T = 293.15;
-% 
-% TF = tf(1,[1 0]);
-% 
-% kf = 1; 
-% wn = RThermal_Noise(R,T,length(i));
-% 
-% fs = 4e8;
-% f = linspace(0,fs/2,length(i)/2);
-% 
-% fnoise = 2*pi*kf.*randn(1,length(i));
-% S = lsim(TF,fnoise,t);
-% i_fnoise = sqrt(abs(S));
-% 
-% fs = f_in*length(i_fnoise)/41;
-% 
-% [Pxx, w] = periodogram(i_fnoise,[],[],fs,'onesided');
-% f = w./(2*pi);
-% ixx = sqrt(Pxx);
-% Line = sqrt(kf./f);
-% grid on
-% N = floor(log2(length(ixx)));
-% [snr, enob, pot_signal_B, f, PSD] = gs_fresp(ixx(1:2^N), 2^N, fs, f_in,1);
-
-
-% t = linspace(0,2*pi,16384);         
-% f_in = 1e5;
-% i =sin(2*pi*f_in.*t);
-% 
-% fs = f_in*(length(i))/41;
-% y = FlickerNoise(1,fs,t);
-% % totalnoise = sqrt(th_n.^2 + y.^2);
-% N = floor(log2(length(y)));
-% 
-% [snr, enob, pot_signal_B, f, PSD] = gs_fresp(y(1:2^N), 2^N, fs, f_in,1);
-
-kf = 10;
-f = linspace(0,10^6,10000);
-S = kf*randn(1,10000)./f;
-fnoise = sqrt(abs(S));
-fnoise = 20*log10(fnoise);
-
-
-
-
-
-
+%Filtering Test
+% Filter_TNoise = 1e-12;
+% FCornerFilter = 1e8;
+% TFnum = 1;
+% TFden = [1e-4 1]; %fc = 1.6kHz, Low-pass
+% Filtered_Att = Filtering(TFnum,TFden,Attenuator_Output,Time,FCornerFilter,Filter_TNoise);
+% plot(Time,Filtered_Att)
 
 
 

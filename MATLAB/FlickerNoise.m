@@ -1,6 +1,6 @@
-function FlickerNoise = FlickerNoise(kf,Frequency_Range,Vector_Length)
+function Flicker = FlickerNoise(kf,Frequency_Vector,Vector_Length)
 
-S = kf*randn(1,Vector_Length)./Frequency_Range;
-FlickerNoise = sqrt(abs(S));
+S = kf./Frequency_Vector;
+Flicker = randn(1,Vector_Length).*sqrt(abs(S)); 
 
 end
