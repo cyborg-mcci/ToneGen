@@ -48,7 +48,7 @@ function [ x, seed ] = f_alpha ( n, q_d, alpha, seed )
 
 %  Set the deviation of the noise.
 %
-  q_d = sqrt ( q_d );
+  q_d = sqrt ( q_d/100 );
 %
 %  Generate the coefficients Hk.
 %
@@ -70,36 +70,41 @@ function [ x, seed ] = f_alpha ( n, q_d, alpha, seed )
 %
 %  Perform the discrete Fourier transforms of Hk and Wk.
 %
-  [ h_azero, h_a, h_b ] = r8vec_sftf ( 2 * n, hfa );
+  %[ h_azero, h_a, h_b ] = r8vec_sftf ( 2 * n, hfa );
+  h = fft(hfa);
 
-  [ w_azero, w_a, w_b ] = r8vec_sftf ( 2 * n, wfa );
-%
+  %[ w_azero, w_a, w_b ] = r8vec_sftf ( 2 * n, wfa );
+  w = fft(wfa);
+  
 %  Multiply the two complex vectors.
 %
-  w_azero = w_azero * h_azero;
+  %w_azero = w_azero * h_azero;
 
-  for i = 1 : n
-    wr = w_a(i);
-    wi = w_b(i);
-    w_a(i) = wr * h_a(i) - wi * h_b(i);
-    w_b(i) = wi * h_a(i) + wr * h_b(i);
-  end
+%   for i = 1 : n
+%     wr = w_a(i);
+%     wi = w_b(i);
+%     w_a(i) = wr * h_a(i) - wi * h_b(i);
+%     w_b(i) = wi * h_a(i) + wr * h_b(i);
+%   end
+hw = h.*w;
 %
 %  This scaling is introduced only to match the behavior
 %  of the Numerical Recipes code...
 %
-  w_azero = w_azero * 2 * n;
-
-  w_a(1:n-1) = w_a(1:n-1) * n;
-  w_b(1:n-1) = w_b(1:n-1) * n;
-
-  w_a(n) = w_a(n) * 2 * n;
-  w_b(n) = w_b(n) * 2 * n;
+%   w_azero = w_azero * 2 * n;
+% 
+%   w_a(1:n-1) = w_a(1:n-1) * n;
+%   w_b(1:n-1) = w_b(1:n-1) * n;
+% 
+%   w_a(n) = w_a(n) * 2 * n;
+%   w_b(n) = w_b(n) * 2 * n;
+%hw = hw * 2 * n;
 %
 %  Take the inverse Fourier transform of the result.
 %
-  x = r8vec_sftb ( 2 * n, w_azero, w_a, w_b );
-%
+
+%  x = r8vec_sftb ( 2 * n, w_azero, w_a, w_b );
+x = ifft(hw);
 %  Discard the second half of the inverse Fourier transform.
 %
   x = x(1:n);

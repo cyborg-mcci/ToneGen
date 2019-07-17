@@ -2,7 +2,7 @@
 
 NumBits = 12;
 MC = 41;
-NumSamples = 8192;
+NumSamples = 2^22;
 FullScale = 2;
 f_in = 1e4;
 fs = f_in*NumSamples/MC;
@@ -18,14 +18,14 @@ sample_cycle_ratio = MC/NumSamples;
 % [snrADC, enobADC, pot_signal_B_ADC, f, PSDADC] = gs_fresp(DO', length(DO), fs, f_in,1);
 
 
-
-%DACNoise
-% FCornerDAC = 1e4;
+% 
+% %DACNoise
+%  FCornerDAC = 1e4;
 % TNoiseDAC = 1e-11;
 % [DAC_Out,DAC_T,DACNoise] = DAC(FCornerDAC,FullScale,MC,NumBits,NumSamples,TNoiseDAC);
 % Time = DAC_T/f_in;
-% % DAC Noise PSD
-% [snrDAC, enobDAC, pot_signal_B_DAC, f, PSDDAC] = gs_fresp(DACNoise', length(DACNoise), fs, f_in,1);
+% DAC Noise PSD
+%[snrDAC, enobDAC, pot_signal_B_DAC, f, PSDDAC] = gs_fresp(DACNoise', length(DACNoise), fs, f_in,1);
 
 
 %Attenuator Noise PSDDivider = 2;
@@ -45,6 +45,57 @@ sample_cycle_ratio = MC/NumSamples;
 
 
 
+% fs = 10e3;
+% [Pxx, f] = periodogram(RThermal*sqrt(fs*2/pi), [], [], fs);
+% 
+
+fs = 10e3;
+
+t = 0:1/fs:(NumSamples-1)/fs;
+
+TNoiseDAC = 1e-11;
+FCornerDAC = 1000;
+
+kf_DAC = FCornerDAC*(TNoiseDAC^2);
+% sample_cycle_ratio = MC/NumSamples;
+
+
+%[FlickerDAC,~] = f_alpha(NumSamples,kf_DAC,1,1);
+
+
+
+f_test = logspace(log10(0.1), log10(fs/2), 1000);
+Sn_fln_test = kf_DAC./f_test;
+in_fln_test = sqrt(Sn_fln_test);
+
+
+% Sn_fln = kf_DAC * randn(1,NumSamples);
+% s = tf('s');
+% shape = s^(-0.5);
+% Sn_fln = abs(lsim(shape, Sn_fln, t));
+% in_fln = sqrt(Sn_fln);
+
+
+in_fln = f_alpha(NumSamples,kf_DAC, 0.5, 1);
+
+
+RThermal = randn(1,NumSamples)*TNoiseDAC;
+%DAC_Noise = RThermal + FlickerDAC;
+
+%DAC_Output = Dig_Out + DAC_Noise;
+DAC_Output = 0;
+DAC_Noise = 0;
+
+
+[Pxx_th, f] = periodogram(RThermal*sqrt(fs*2/pi), [], [], fs);
+[Pxx_fl, f_fl] = periodogram(in_fln*sqrt(fs*2/pi), [], [], fs);
+
+
+
+figure(1)
+loglog(f, sqrt(Pxx_th), f_test, in_fln_test, f_fl, sqrt(Pxx_fl))
+%semilogx(f_test, 10*log10(Sn_fln_test), f_fl, 10*log10(Pxx_fl))
+grid on
 
 
 
