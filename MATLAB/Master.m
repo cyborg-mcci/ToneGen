@@ -36,16 +36,16 @@ maxNumCompThreads(12);
 
 %% Parameter Declaration
 
-NumBits = 12;
+NumBits = 16;
 MC = 41;
 NumSamples = 8192;
-FullScale = 2;
+FullScale = (1e-3)*100;
 f_in = 1e4;
 fs = f_in*NumSamples/MC;
 
 %%%% DAC
-FcornerDAC = 1e3;
-DAC_ThermalN = 1e-11;
+FcornerDAC = 1e4;
+DAC_ThermalN = 50e-12;
 [DAC_Output,Normalised_Time,DAC_Noise] = DAC(FcornerDAC,FullScale,MC,NumBits,NumSamples,DAC_ThermalN);
 Time = Normalised_Time/f_in;
 
@@ -62,18 +62,18 @@ TFnum = 1;
 TFden = [1e-4 1]; %fc = 1.6kHz
 Filtered_Att = Filtering(TFnum,TFden,AttOutput,Time,FCornerFilter,Filter_TNoise);
 
-p1 = subplot(3,1,1);
-plot(Time,DAC_Output)
-title('DAC')
-p2 = subplot(3,1,2);
-plot(Time,AttOutput)
-title('Attenuator')
-p3 = subplot(3,1,3);
-plot(Time,Filtered_Att)
-title('Filtered')
-linkaxes([p1,p2,p3],'xy');
+% p1 = subplot(3,1,1);
+% plot(Time,DAC_Output)
+% title('DAC')
+% p2 = subplot(3,1,2);
+% plot(Time,AttOutput)
+% title('Attenuator')
+% p3 = subplot(3,1,3);
+% plot(Time,Filtered_Att)
+% title('Filtered')
+% linkaxes([p1,p2,p3],'xy');
 
-% [snr, enob, pot_signal_B, f, PSD] = gs_fresp(Filtered_Att', length(Filtered_Att), fs, f_in,1);
+[snr, enob, pot_signal_B, f, PSD] = gs_fresp(DAC_Noise', length(DAC_Noise), fs, f_in,1);
 
 
 

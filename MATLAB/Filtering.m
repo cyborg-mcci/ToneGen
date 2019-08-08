@@ -8,8 +8,8 @@ TransferFunction = tf(TFnum,TFden);
 Filtered = lsim(TransferFunction,AttenuatorOutput,Time)';
 
 Filter_Thermal = randn(1,length(AttenuatorOutput))*Filter_TNoise;
-[FilterFlicker,seed] = f_alpha(length(AttenuatorOutput),kf_Filter,1,1);
-Filter_Noise = Filter_Thermal + FilterFlicker;
+[FilterFlicker,~] = f_alpha(length(AttenuatorOutput),kf_Filter,0.5,1);
+Filter_Noise = Filter_Thermal + FilterFlicker';
 
 Filter_Output = Filtered + Filter_Noise;
 

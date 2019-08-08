@@ -5,10 +5,10 @@ function [Attenuator_Output,Att_Noise]  = Attenuator(DAC_Output,Divider,FCorner_
 Div_Output = DAC_Output/Divider;
 
 kf_Att = FCorner_Att*TNoise_Att^2;
-[Att_Flicker,seed] = f_alpha(length(DAC_Output),kf_Att,1,1);
+[Att_Flicker,~] = f_alpha(length(DAC_Output),kf_Att,0.5,1);
 Att_Thermal = randn(1,length(DAC_Output))*TNoise_Att;
 
-Att_Noise = Att_Flicker + Att_Thermal;
+Att_Noise = Att_Flicker' + Att_Thermal;
 Attenuator_Output = Div_Output + Att_Noise;
 
 end

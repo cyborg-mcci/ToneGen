@@ -48,7 +48,7 @@ function [ x, seed ] = f_alpha ( n, q_d, alpha, seed )
 
 %  Set the deviation of the noise.
 %
-  q_d = sqrt ( q_d/100 );
+  q_d = sqrt( q_d );
 %
 %  Generate the coefficients Hk.
 %

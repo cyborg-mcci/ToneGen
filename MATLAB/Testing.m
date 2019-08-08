@@ -1,12 +1,12 @@
 %Testing space for ToneGen
 
-NumBits = 12;
-MC = 41;
-NumSamples = 2^22;
-FullScale = 2;
-f_in = 1e4;
-fs = f_in*NumSamples/MC;
-sample_cycle_ratio = MC/NumSamples;
+% % NumBits = 12;
+% % MC = 41;
+% % NumSamples = 2^16;
+% % FullScale = 2;
+% % f_in = 1e4;
+% % fs = f_in*NumSamples/MC;
+% % sample_cycle_ratio = MC/NumSamples;
 
 %ADC
 % [DO,T] = ADC(sample_cycle_ratio,FullScale,NumBits, MC);
@@ -49,14 +49,14 @@ sample_cycle_ratio = MC/NumSamples;
 % [Pxx, f] = periodogram(RThermal*sqrt(fs*2/pi), [], [], fs);
 % 
 
-fs = 10e3;
+% % fs = 10e3;
 
-t = 0:1/fs:(NumSamples-1)/fs;
+% t = 0:1/fs:(NumSamples-1)/fs;
 
-TNoiseDAC = 1e-11;
-FCornerDAC = 1000;
-
-kf_DAC = FCornerDAC*(TNoiseDAC^2);
+% % TNoiseDAC = 1e-11;
+% % FCornerDAC = 1000;
+% % 
+% % kf_DAC = FCornerDAC*(TNoiseDAC^2);
 % sample_cycle_ratio = MC/NumSamples;
 
 
@@ -64,9 +64,9 @@ kf_DAC = FCornerDAC*(TNoiseDAC^2);
 
 
 
-f_test = logspace(log10(0.1), log10(fs/2), 1000);
-Sn_fln_test = kf_DAC./f_test;
-in_fln_test = sqrt(Sn_fln_test);
+% f_test = logspace(log10(0.1), log10(fs/2), 1000);
+% Sn_fln_test = kf_DAC./f_test;
+% in_fln_test = sqrt(Sn_fln_test);
 
 
 % Sn_fln = kf_DAC * randn(1,NumSamples);
@@ -76,26 +76,31 @@ in_fln_test = sqrt(Sn_fln_test);
 % in_fln = sqrt(Sn_fln);
 
 
-in_fln = f_alpha(NumSamples,kf_DAC, 0.5, 1);
-
-
-RThermal = randn(1,NumSamples)*TNoiseDAC;
+% % in_fln = f_alpha(NumSamples,kf_DAC, 0.5, 1);
+% % 
+% % 
+% % RThermal = randn(1,NumSamples)*TNoiseDAC;
 %DAC_Noise = RThermal + FlickerDAC;
 
 %DAC_Output = Dig_Out + DAC_Noise;
-DAC_Output = 0;
-DAC_Noise = 0;
+% % DAC_Output = 0;
+% % DAC_Noise = 0;
 
 
-[Pxx_th, f] = periodogram(RThermal*sqrt(fs*2/pi), [], [], fs);
-[Pxx_fl, f_fl] = periodogram(in_fln*sqrt(fs*2/pi), [], [], fs);
+% % [Pxx_th, f] = periodogram(RThermal*sqrt(fs*2/pi), [], [], fs);
+% % [Pxx_fl, f_fl] = periodogram(in_fln*sqrt(fs*2/pi), [], [], fs);
 
 
 
-figure(1)
-loglog(f, sqrt(Pxx_th), f_test, in_fln_test, f_fl, sqrt(Pxx_fl))
+% figure(1)
+% loglog(f, sqrt(Pxx_th), f_test, in_fln_test, f_fl, sqrt(Pxx_fl))
 %semilogx(f_test, 10*log10(Sn_fln_test), f_fl, 10*log10(Pxx_fl))
-grid on
+% grid on
 
+N = 2^10;
+t = linspace(0,2*pi,N);
+fi = 1e1;
+y = sin(2*pi*fi*t);
+fs = fi*N/41;
 
-
+[snr, enob, pot_signal_B, f, PSD] = gs_fresp(y', N, fs, fi, 1);
