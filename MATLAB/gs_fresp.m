@@ -18,17 +18,18 @@ function [snr, enob, pot_signal_B, f, PSD] = gs_fresp(x, N, fs, fi, OSR)
 %%%%Frequency response of a real signal%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 global FigureCounter;
 FigureCounter = 0;
-ventana=hann(N,'periodic');                  %Window for the data.   %%%blackmanharris
+%ventana=hann(N,'periodic');                  %Window for the data.   %%%blackmanharris
+ventana = (N);
 win_data=x.*ventana;                         %Windowed data.
 spectrum=2*fft(win_data)/(sum(ventana));     %FFT Single side.
 psd=10*log10(abs(spectrum.^2));              %PowerSpectralDensity.
 FigureCounter = FigureCounter + 1;
 figure(FigureCounter);
-semilogx([0:N/2-1].*(fs/N), psd(1:N/2)); %Plotting options
-xlabel('Frequency, Hz','FontSize',14)        %Plotting options  
-ylabel('PSD, dB','FontSize',14)              %Plotting options 
-set(gca,'FontSize',14)                       %Plotting options
-grid on    
+% semilogx([0:N/2-1].*(fs/N), psd(1:N/2)); %Plotting options
+% xlabel('Frequency, Hz','FontSize',14)        %Plotting options  
+% ylabel('PSD, dB','FontSize',14)              %Plotting options 
+% set(gca,'FontSize',14)                       %Plotting options
+% grid on    
 f = [0:N/2-1].*(fs/N);
 PSD = psd(1:N/2);
 %Plotting options

@@ -9,7 +9,7 @@ sample_cycle_ratio = MC/NumSamples;
 
 [FlickerDAC,~] = f_alpha(NumSamples,kf_DAC,0.5,1);
 Thermal = randn(1,NumSamples)*TNoiseDAC;
-RThermal = randn(1,NumSamples)*sqrt(4*physconst('Boltzmann')*293*100);
+RThermal = randn(1,NumSamples)*sqrt(4*physconst('Boltzmann')*293*1e6);
 DAC_Noise = Thermal + FlickerDAC' + RThermal;
 
 DAC_Output = Dig_Out + DAC_Noise;
