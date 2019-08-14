@@ -1,5 +1,7 @@
 %Dual channel DAC w/ mixing
+global FigureCounter;
 
+FigureCounter = 0;
 %DAC output
 FCornerDAC = 1e6;
 FullScale = 1;
@@ -16,7 +18,8 @@ TNoiseDAC = 50e-12;
 [DAC_Output,DAC_NormalisedTime,~] = DAC(FCornerDAC,FullScale,NearestPrime,num_bits,NumSamples,TNoiseDAC);
 Time = DAC_NormalisedTime/f_in;
 
-[snr1, enob1, pot_signal_B1, f1, PSD1] = gs_fresp(DAC_Output', NumSamples, fs, f_in, 1);
+%[snr1, enob1, pot_signal_B1, f1, PSD1] = gs_fresp(DAC_Output', NumSamples, fs, f_in, 1);
+[Spectrum, f_TS, PSD_OSdB, f_OS, Window] = wall_fresp(DAC_Output, Time, @hann, 1);
 
 figure(1)
 clf
