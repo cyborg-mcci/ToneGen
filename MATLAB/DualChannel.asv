@@ -1,10 +1,9 @@
 %Dual channel DAC w/ mixing
-
 global FigureCounter;
-FigureCounter = 0;
 k = physconst('Boltzmann');
-
 %DAC parameters
+FigureCounter = 0;
+%DAC output
 FCornerDAC = 1e6;
 TNoiseDAC = 50e-12;
 FullScale = 1;
@@ -112,7 +111,6 @@ subplot(2,1,2)
 semilogx(Filter_1_f_OS,PSD_Filter_1)
 
 %Bode plot of DAC filter's transfer function
-FigureCounter = FigureCounter + 1;
 figure(FigureCounter)
 clf
 options = bodeoptions;
@@ -144,7 +142,7 @@ Final_Output = Filtering(num1,den1,Mixer_Output,Time,FCornerFilter,Filter_TNoise
 
 Mixer_Output = detrend(Mixer_Output, 'constant');
 
-%Plotting Mixer output in time and frequency domain (One-sided FFT)
+%Mime time 
 FigureCounter = FigureCounter + 1;
 figure(FigureCounter)
 clf
