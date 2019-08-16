@@ -12,13 +12,13 @@ f = 10e6; %%input signal frequency (worst case)
 w = 2*pi*f;
 
 %%Resistor values
-
 R2A = 150e6;
 R2B = 150e6;
 R2 = R2A + R2B;
 R3 = 1e6;
 R4 = 30e6;
 G = R4./R3;
+
 
 R1 =(R2)./G; %%balanced resistor bridge
 
