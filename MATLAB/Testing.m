@@ -97,10 +97,62 @@
 %semilogx(f_test, 10*log10(Sn_fln_test), f_fl, 10*log10(Pxx_fl))
 % grid on
 
-N = 2^10;
-t = linspace(0,2*pi,N);
-fi = 1e1;
-y = sin(2*pi*fi*t);
-fs = fi*N/41;
+% N = 2^10;
+% t = linspace(0,2*pi,N);
+% fi = 1e1;
+% y = sin(2*pi*fi*t);
+% fs = fi*N/41;
+% 
+% [snr, enob, pot_signal_B, f, PSD] = gs_fresp(y', N, fs, fi, 1);
 
-[snr, enob, pot_signal_B, f, PSD] = gs_fresp(y', N, fs, fi, 1);
+
+%% Testing the DAC Flicker Noise
+
+% k = physconst('Boltzmann'); %Boltzmann's constant
+% Temperature = 300; %Temperature in Kelvin
+% 
+% % DAC parameters (ADI LTC1668)
+% FCornerDAC = 1e4; %estimate; not in datasheet
+% TNoiseDAC_i = 50e-12; %per sqrt(Hz) - Value from Datasheet
+% 
+% fs = 50e6; % DAC Sample Frequency
+% 
+% NumSamples = 2^16;
+% 
+% f_in_desired= 50e3;
+% NearestPrime = max(primes(f_in_desired*(NumSamples)/fs));
+% f_in = fs*NearestPrime/(NumSamples);
+% 
+% 
+% 
+% kf_DAC = FCornerDAC*(TNoiseDAC^2);
+% sample_cycle_ratio = MC/NumSamples;
+% 
+% [Dig_Out,DAC_NormalisedTime] = ADC(sample_cycle_ratio,FullScale,num_bits,MC);
+% 
+% [FlickerDAC,~] = f_alpha(NumSamples,kf_DAC,0.5,1);
+% Thermal = randn(1,NumSamples)*TNoiseDAC;
+% RThermal = randn(1,NumSamples)*sqrt(4*physconst('Boltzmann')*Temperature/Converter_R);
+% DAC_Noise = Thermal + FlickerDAC' + RThermal;
+% DAC_Output = DAC_Noise;
+% 
+% Time = DAC_NormalisedTime_1/f_in;
+
+
+NoSamples = 2^22;
+thn = 50e-12;
+fc_fln = 1000;
+k_fln = fc_fln * (thn^2);
+
+ts = 1e-9;
+
+[Flicker, ~] = f_alpha(NoSamples, k_fln, 0.5, 1);
+Thermal = randn(1,NoSamples)*thn;
+
+%Noise = Flicker' + Thermal;
+Noise = Flicker';
+
+t = 0:ts:(NoSamples-1)*ts;
+
+[DAC_Output_1_i_Spectrum, DACOutput_1_i_f_TS, PSD_OS, f_OS, DAC_Output_1_Window] = wall_fresp(Noise, t, @rectwin, 0);
+loglog(f_OS, db2mag(PSD_OS), f_OS, sqrt(k_fln./f_OS))
