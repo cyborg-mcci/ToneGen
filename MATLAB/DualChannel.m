@@ -37,18 +37,21 @@ maxNumCompThreads(12);
 
 %% Parameter declaration
 
+%_i indicates a current quantity
+%_v indicates a voltage quantity
+
 k = physconst('Boltzmann'); %Boltzmann's constant
 Temperature = 300; %Temperature in Kelvin
 
 % DAC parameters (ADI LTC1668)
 FCornerDAC = 1e4; %estimate; not in datasheet
 TNoiseDAC_i = 50e-12; %per sqrt(Hz)
-FullScale_i = 1e-3;
+FullScale_i = 1e-3; 
 num_bits = 16;
 fs = 50e6;
 
 % Input signal parameters and coherent sampling condition
-NumSamples = 2^22;
+NumSamples = 2^16;
 f_in_desired= 50e3;
 NearestPrime = max(primes(f_in_desired*(NumSamples)/fs));
 f_in = fs*NearestPrime/(NumSamples);
@@ -72,7 +75,7 @@ num_f1 = [R_f1/L_f1 0]; %Transfer function numerator coefficients, in descending
 den_f1 = [1 R_f1/L_f1 1/(L_f1*C_f1)]; %Transfer function denominator coefficients, in descending powers of s
 filter_1 = tf(num_f1,den_f1); %Filter transfer function
 FCornerFilter_1 = 0; %Filter 1/f noise corner frequency
-Filter_TNoise_1_v = sqrt(4*k*Temperature*R_f1);
+Filter_TNoise_1_v = sqrt(4*k*Temperature*R_f1); %Filter thermal noise
 
 % Analog multiplier (Mixer) parameters: (HA-2556)
 FCorner_Mixer = 1e4; %1/f noise corner frequency
@@ -81,16 +84,16 @@ TNoise_Mixer_v = 0.15e-6; %specified at f = 1kHz (worst case)
 % Sample RLC filter at the Mixer output: parameters
 % resonates at f1 = 2*f0 (as squared sine wave has double the input
 % frequency)
-f_f2 = 2*f_f1; 
-BW_f2 = 50;
-L_f2 = 1e-3;
-R_f2 = 2*pi*BW_f2*L_f2;
-C_f2 = 1/(4*(pi^2)*(f_f2^2)*L_f2);
-num_f2 = [R_f2/L_f2 0];
-den_f2 = [1 R_f2/L_f2 1/(L_f2*C_f2)];
-filter_2 = tf(num_f2,den_f2);
-FCornerFilter_2 = 0;
-Filter_TNoise_2_v = sqrt(4*k*Temperature*R_f2);
+f_f2 = 2*f_f1; %resonant frequency
+BW_f2 = 50; %bandwidth
+L_f2 = 1e-3; %inductance
+R_f2 = 2*pi*BW_f2*L_f2; %resistance
+C_f2 = 1/(4*(pi^2)*(f_f2^2)*L_f2); % capacitance
+num_f2 = [R_f2/L_f2 0]; % transfer function numerator coefficients, in descending powers of s
+den_f2 = [1 R_f2/L_f2 1/(L_f2*C_f2)]; % transfer function denominator coefficients, in descending powers of s
+filter_2 = tf(num_f2,den_f2); %Filter transfer function
+FCornerFilter_2 = 0; % 1/f noise corner frequency
+Filter_TNoise_2_v = sqrt(4*k*Temperature*R_f2); %Filter thermal noise
 
 
 %Sample LC current-mode filter at Howland output
@@ -106,26 +109,17 @@ FCornerFilter_3 = 0;
 Filter_TNoise_3_v = sqrt(4*k*Temperature*R_f2);
 
 %% Model
-%_i indicates a current quantity
-%_v indicates a voltage quantity
-
 
 % DAC Output, includes Converter_R noise 
 [DAC_Output_1_i,DAC_NormalisedTime_1] = DAC(FCornerDAC,FullScale_i,NearestPrime,num_bits,NumSamples,TNoiseDAC_i,Converter_R,Temperature);
 [DAC_Output_2_i,DAC_NormalisedTime_2] = DAC(FCornerDAC,FullScale_i,NearestPrime,num_bits,NumSamples,TNoiseDAC_i,Converter_R,Temperature);
 
-
-
 % Scaling time vector depending on the input frequency
 Time = DAC_NormalisedTime_1/f_in;
-
-
 
 % PSD of the DAC output
 [DAC_Output_1_i_Spectrum, DACOutput_1_i_f_TS, PSD_DAC_Output_1_i, DAC_Output_1_f_OS, DAC_Output_1_Window] = wall_fresp(DAC_Output_1_i, Time, @rectwin, 0);
 %[DAC_Output_2_i_Spectrum, DAC_Output_2_i_f_TS, PSD_DAC_Output_2_i, DAC_Output_2_f_OS, DAC_Output_2_Window] = wall_fresp(DAC_Output_1_i, Time, @rectwin, 0);
-
-
 
 % Plotting DAC Output in time and frequency domain (One-sided FFT)
 FigureCounter = FigureCounter + 1;
@@ -141,16 +135,15 @@ semilogx(DAC_Output_1_f_OS,PSD_DAC_Output_1_i)
 xlabel('Frequency (Hz)')
 ylabel('PSD')
 
-
 % FigureCounter = FigureCounter + 1;
 % figure(FigureCounter)
 % clf
-% subplot(2,1,1)
+% subplot(4,1,3)
 % plot(Time,DAC_Output_2_i)
 % xlabel('Time (s)')
 % ylabel('DAC output 2 (Current)')
 % title('DAC output 2 (A)')
-% subplot(2,1,2)
+% subplot(4,1,4)
 % semilogx(DAC_Output_2_f_OS,PSD_DAC_Output_2_i)
 % xlabel('Frequency (Hz)')
 % ylabel('PSD')
@@ -159,7 +152,6 @@ ylabel('PSD')
 % Creating two voltage channels
 Channel_1_v = DAC_Output_1_i*Converter_R;
 Channel_2_v = DAC_Output_2_i*Converter_R;
-
 
 % Voltage signal
 [Channel_1_v_Spectrum, Channel_1_v_f_TS, PSD_Channel_1_v, Channel_1_v_f_OS, Channel_1_v_Window] = wall_fresp(Channel_1_v, Time, @rectwin, 0);
@@ -199,6 +191,7 @@ Filter_Output_2_v = Filtering(num_f1,den_f1,Channel_2_v,Time,FCornerFilter_1,Fil
 [Filter_Output_1_v_Spectrum, Filter_Output_1_v_f_TS, PSD_Filter_Output_1_v, Filter_Output_1_v_f_OS, Filter_Output_1_v_Window] = wall_fresp(Filter_Output_1_v, Time, @rectwin, 0);
 % [Filter_Output_2_v_Spectrum, Filter_Output_2_v_f_TS, PSD_Filter_Output_2_v, Filter_Output_2_v_f_OS, Filter_Output_2_v_Window] = wall_fresp(Filter_Output_2_v, Time, @rectwin, 0);
 
+% SettlingTime = stepinfo(sys,'SettlingTimeThreshold',0.005);
 
 % Plotting Filter output in time and frequency domain (One-sided
 % FFT),removing transient from time domain output by only plotting the
@@ -236,10 +229,8 @@ options.FreqUnits = 'Hz';
 bode(filter_1,options)
 title('Filter for the DAC output')
 
-
 Mixer_Output_v = Mixer(Filter_Output_1_v,Filter_Output_2_v,TNoise_Mixer_v,FCorner_Mixer);
 [Mixer_Spectrum, Mixer_f_TS, PSD_Mixer, Mixer_f_OS, Mixer_Window] = wall_fresp(Mixer_Output_v, Time, @rectwin, 0);
-
 
 % Plotting Mixer output in time and frequency domain (One-sided FFT)
 FigureCounter = FigureCounter + 1;
