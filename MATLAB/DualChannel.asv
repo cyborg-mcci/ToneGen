@@ -46,7 +46,7 @@ Temperature = 300; %Temperature in Kelvin
 % DAC parameters (ADI LTC1668)
 FCornerDAC = 1e4; %estimate; not in datasheet
 TNoiseDAC_i = 50e-12; %per sqrt(Hz) - Value from Datasheet
-FullScale_i = 10e-3; % Value from Datasheet
+FullScale_i = 1e-3; % Value from Datasheet
 num_bits = 16;
 fs = 50e6; % DAC Sample Frequency
 

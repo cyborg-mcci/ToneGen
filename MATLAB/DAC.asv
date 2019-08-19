@@ -1,7 +1,7 @@
 function [DAC_Output,DAC_NormalisedTime] = DAC(FCornerDAC,FullScale,MC,num_bits,NumSamples,TNoiseDAC,Converter_R,Temperature)
 %%%%Returns output of DAC (in Amps)
 %%%%TNoiseDAC in A/sqrt(Hz)
-%global k;
+global k;
 
 kf_DAC = FCornerDAC*(TNoiseDAC^2);
 sample_cycle_ratio = MC/NumSamples;
