@@ -141,8 +141,8 @@
 
 NoSamples = 2^22;
 thn = 50e-12;
-fc_fln = 1000;
-k_fln = fc_fln * (thn^2);
+fc_fln = 1e6;
+k_fln = (fc_fln * (thn^2));
 
 ts = 1e-9;
 
@@ -152,7 +152,8 @@ Thermal = randn(1,NoSamples)*thn;
 %Noise = Flicker' + Thermal;
 Noise = Flicker';
 
+
 t = 0:ts:(NoSamples-1)*ts;
 
-[DAC_Output_1_i_Spectrum, DACOutput_1_i_f_TS, PSD_OS, f_OS, DAC_Output_1_Window] = wall_fresp(Noise, t, @rectwin, 0);
+[DAC_Output_1_i_Spectrum, DACOutput_1_i_f_TS, PSD_OS, f_OS, DAC_Output_1_Window] = wall_fresp(Noise, t, @blackman, 0);
 loglog(f_OS, db2mag(PSD_OS), f_OS, sqrt(k_fln./f_OS))
