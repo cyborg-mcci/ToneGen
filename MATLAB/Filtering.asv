@@ -1,4 +1,4 @@
-function [Filtered] = Filtering(TFnum,TFden,Signal,Time,FCornerFilter,TNoiseFilter,fs)
+function [Filtered] = Filtering(TFnum,TFden,Signal,Time,FCornerFilter,TNoiseFilter)
 %%Returns filtered output of Attenuator
 % Filter_TNoise in A/sqrt(Hz)
 
@@ -9,9 +9,10 @@ sigma_Thermal = TNoiseFilter*sqrt(fs/2);
 Thermal = randn(1,length(Signal))*sigma_Thermal;
 var_Flicker = FCornerFilter*(TNoiseFilter^2)*log(length(Signal)/2);
 
-[FlickerFilter,~] = f_alpha(length(Signal),var_Flicker,1,1);
+[FlickerDAC,~] = f_alpha(length(Signal),var_Flicker,1,1);
 
-Filter_Noise = Thermal + FlickerFilter';
+RThermal = randn(1,NumSamples)*sqrt(4*physconst('Boltzmann')*Temperature/Converter_R);
+DAC_Noise = Thermal + FlickerDAC' + RThermal;
 Input = Signal + Filter_Noise;
 %Input = Signal;
 

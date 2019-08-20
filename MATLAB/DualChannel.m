@@ -1,4 +1,4 @@
-%% DualCrectwinel.m
+%% DualChannel.m
 %%  Microelectronic Circuits Centre Ireland (www.mcci.ie)
 % 
 %% 
@@ -14,7 +14,7 @@
 % 
 % *File Description:*
 % 
-% _Script modelling a low noise current source with dual crectwinel DACs and 
+% _Script modelling a low noise current source with dual channel DACs and 
 %   multiplication for uncorrelated noise cancelling_
 % 
 % 
@@ -24,7 +24,7 @@
 %% Initialisation Section
 
 clearvars -EXCEPT nch pch
-global ON OFF s FigureCounter f k;
+global ON OFF s FigureCounter k;
 
 ON = 1;
 OFF = 0;
@@ -44,7 +44,7 @@ k = physconst('Boltzmann'); %Boltzmann's constant
 Temperature = 300; %Temperature in Kelvin
 
 % DAC parameters (ADI LTC1668)
-FCornerDAC = 1e4; %estimate; not in datasheet
+FCornerDAC = 1e6; %estimate; not in datasheet
 TNoiseDAC_i = 50e-12; %per sqrt(Hz) - Value from Datasheet
 FullScale_i = 10e-3; % Value from Datasheet
 num_bits = 16;
@@ -112,15 +112,15 @@ Filter_TNoise_3_v = sqrt(4*k*Temperature*Rpar_f3);
 %% Model
 
 % DAC Output, includes Converter_R noise 
-[DAC_Output_1_i,DAC_NormalisedTime_1] = DAC(FCornerDAC,FullScale_i,NearestPrime,num_bits,NumSamples,TNoiseDAC_i,Converter_R,Temperature);
-[DAC_Output_2_i,DAC_NormalisedTime_2] = DAC(FCornerDAC,FullScale_i,NearestPrime,num_bits,NumSamples,TNoiseDAC_i,Converter_R,Temperature);
+[DAC_Output_1_i,DAC_NormalisedTime_1] = DAC(FCornerDAC,FullScale_i,NearestPrime,num_bits,NumSamples,TNoiseDAC_i,Converter_R,Temperature,fs);
+[DAC_Output_2_i,DAC_NormalisedTime_2] = DAC(FCornerDAC,FullScale_i,NearestPrime,num_bits,NumSamples,TNoiseDAC_i,Converter_R,Temperature,fs);
 
 % Scaling time vector depending on the input frequency
 Time = DAC_NormalisedTime_1/f_in;
 
 % PSD of the DAC output
-[DAC_Output_1_i_Spectrum, DACOutput_1_i_f_TS, PSD_DAC_Output_1_i, DAC_Output_1_f_OS, DAC_Output_1_Window] = wall_fresp(DAC_Output_1_i, Time, @rectwin, 0);
-%[DAC_Output_2_i_Spectrum, DAC_Output_2_i_f_TS, PSD_DAC_Output_2_i, DAC_Output_2_f_OS, DAC_Output_2_Window] = wall_fresp(DAC_Output_1_i, Time, @rectwin, 0);
+[DAC_Output_1_i_Spectrum, DACOutput_1_i_f_TS, PSD_DAC_Output_1_i, DAC_Output_1_f_OS, DAC_Output_1_Window] = wall_fresp(DAC_Output_1_i, Time, @blackman, 0);
+%[DAC_Output_2_i_Spectrum, DAC_Output_2_i_f_TS, PSD_DAC_Output_2_i, DAC_Output_2_f_OS, DAC_Output_2_Window] = wall_fresp(DAC_Output_1_i, Time, @hann, 0);
 
 % Plotting DAC Output in time and frequency domain (One-sided FFT)
 FigureCounter = FigureCounter + 1;
@@ -132,9 +132,11 @@ xlabel('Time (s)')
 ylabel('DAC output 1 (Current)')
 title('DAC output 1 (A)')
 subplot(2,1,2)
-semilogx(DAC_Output_1_f_OS,db2mag(PSD_DAC_Output_1_i))
+semilogx(DAC_Output_1_f_OS,PSD_DAC_Output_1_i)
 xlabel('Frequency (Hz)')
 ylabel('PSD')
+
+
 
 % FigureCounter = FigureCounter + 1;
 % figure(FigureCounter)
@@ -150,47 +152,47 @@ ylabel('PSD')
 % ylabel('PSD')
 
 
-% Creating two voltage crectwinels
-Crectwinel_1_v = DAC_Output_1_i*Converter_R;
-Crectwinel_2_v = DAC_Output_2_i*Converter_R;
+% Creating two voltage channels
+Channel_1_v = DAC_Output_1_i*Converter_R;
+Channel_2_v = DAC_Output_2_i*Converter_R;
 
 % Voltage signal
-[Crectwinel_1_v_Spectrum, Crectwinel_1_v_f_TS, PSD_Crectwinel_1_v, Crectwinel_1_v_f_OS, Crectwinel_1_v_Window] = wall_fresp(Crectwinel_1_v, Time, @rectwin, 0);
-% [Crectwinel_2_v_Spectrum, Crectwinel_2_v_f _TS, PSD_Crectwinel_2_v, Crectwinel_2_v_f _OS, Crectwinel_2_v_Window] = wall_fresp(Crectwinel_2_v, Time, @rectwin, 0);
+[Channel_1_v_Spectrum, Channel_1_v_f_TS, PSD_Channel_1_v, Channel_1_v_f_OS, Channel_1_v_Window] = wall_fresp(Channel_1_v, Time, @hann, 0);
+% [Channel_2_v_Spectrum, Channel_2_v_f _TS, PSD_Channel_2_v, Channel_2_v_f _OS, Channel_2_v_Window] = wall_fresp(Channel_2_v, Time, @hann, 0);
 
 
-% Plotting Crectwinel 1 (V) in time and frequency domain (One-sided FFT)
+% Plotting Channel 1 (V) in time and frequency domain (One-sided FFT)
 FigureCounter = FigureCounter + 1;
 figure(FigureCounter)
 clf
 subplot(2,1,1)
-plot(Time,Crectwinel_1_v)
+plot(Time,Channel_1_v)
 xlabel('Time (s)')
 ylabel('DAC output (Voltage)')
 title('DAC output (V)')
 subplot(2,1,2)
-semilogx(Crectwinel_1_v_f_OS,PSD_Crectwinel_1_v)
+semilogx(Channel_1_v_f_OS,PSD_Channel_1_v)
 xlabel('Frequency (Hz)')
 ylabel('PSD')
 
-% Crectwinel 2
+% Channel 2
 % subplot(4,1,3)
-% plot(Time,Crectwinel_2_v)
+% plot(Time,Channel_2_v)
 % xlabel('Time (s)')
 % ylabel('DAC output (Voltage)')
 % title('DAC output (V)')
 % subplot(4,1,4)
-% semilogx(Crectwinel_2_f _OS,PSD_Crectwinel_2_v)
+% semilogx(Channel_2_f _OS,PSD_Channel_2_v)
 % xlabel('Frequency (Hz)')
 % ylabel('PSD')
 
 
 % Filter output
-Filter_Output_1_v = Filtering(num_f1,den_f1,Crectwinel_1_v,Time,FCornerFilter_1,Filter_TNoise_1_v);
-Filter_Output_2_v = Filtering(num_f1,den_f1,Crectwinel_2_v,Time,FCornerFilter_1,Filter_TNoise_1_v);
+Filter_Output_1_v = Filtering(num_f1,den_f1,Channel_1_v,Time,FCornerFilter_1,Filter_TNoise_1_v,fs);
+Filter_Output_2_v = Filtering(num_f1,den_f1,Channel_2_v,Time,FCornerFilter_1,Filter_TNoise_1_v,fs);
 
-[Filter_Output_1_v_Spectrum, Filter_Output_1_v_f_TS, PSD_Filter_Output_1_v, Filter_Output_1_v_f_OS, Filter_Output_1_v_Window] = wall_fresp(Filter_Output_1_v, Time, @rectwin, 0);
-% [Filter_Output_2_v_Spectrum, Filter_Output_2_v_f_TS, PSD_Filter_Output_2_v, Filter_Output_2_v_f_OS, Filter_Output_2_v_Window] = wall_fresp(Filter_Output_2_v, Time, @rectwin, 0);
+[Filter_Output_1_v_Spectrum, Filter_Output_1_v_f_TS, PSD_Filter_Output_1_v, Filter_Output_1_v_f_OS, Filter_Output_1_v_Window] = wall_fresp(Filter_Output_1_v, Time, @hann, 0);
+% [Filter_Output_2_v_Spectrum, Filter_Output_2_v_f_TS, PSD_Filter_Output_2_v, Filter_Output_2_v_f_OS, Filter_Output_2_v_Window] = wall_fresp(Filter_Output_2_v, Time, @hann, 0);
 
 % SettlingTime = stepinfo(sys,'SettlingTimeThreshold',0.005);
 
@@ -230,8 +232,8 @@ options.FreqUnits = 'Hz';
 bode(filter_1,options)
 title('Filter for the DAC output')
 
-Mixer_Output_v = Mixer(Filter_Output_1_v,Filter_Output_2_v,TNoise_Mixer_v,FCorner_Mixer);
-[Mixer_Spectrum, Mixer_f_TS, PSD_Mixer, Mixer_f_OS, Mixer_Window] = wall_fresp(Mixer_Output_v, Time, @rectwin, 0);
+Mixer_Output_v = Mixer(Filter_Output_1_v,Filter_Output_2_v,TNoise_Mixer_v,FCorner_Mixer,fs);
+[Mixer_Spectrum, Mixer_f_TS, PSD_Mixer, Mixer_f_OS, Mixer_Window] = wall_fresp(Mixer_Output_v, Time, @hann, 0);
 
 % Plotting Mixer output in time and frequency domain (One-sided FFT)
 FigureCounter = FigureCounter + 1;
@@ -257,8 +259,8 @@ title('Filter for Mixer output')
 
 
 % Mixer output after filtering
-Howland_Input_v = Filtering(num_f2,den_f2,Mixer_Output_v,Time,FCornerFilter_2,Filter_TNoise_2_v);
-[Final_Spectrum, Final_f_TS, PSD_Final, Final_f_OS, Final_Window] = wall_fresp(Howland_Input_v, Time, @rectwin, 0);
+Howland_Input_v = Filtering(num_f2,den_f2,Mixer_Output_v,Time,FCornerFilter_2,Filter_TNoise_2_v,fs);
+[Final_Spectrum, Final_f_TS, PSD_Final, Final_f_OS, Final_Window] = wall_fresp(Howland_Input_v, Time, @hann, 0);
 
 
 %Offsetting the squared sine wave to be centred at zero (need to fix this

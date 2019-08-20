@@ -6,10 +6,10 @@ Product = Channel_1.*Channel_2;
 
 sigma_Thermal = TNoiseMixer*sqrt(fs/2);
 Thermal = randn(1,length(Product))*sigma_Thermal;
-var_Flicker = FCornerMixer*(TNoiseMixer^2)*log(length(Product)/2);
+var_Flicker = FCornerMixer*(TNoiseFilter^2)*log(length(Signal)/2);
 
-[FlickerMixer,~] = f_alpha(length(Product),var_Flicker,1,1);
+[FlickerDAC,~] = f_alpha(length(Signal),var_Flicker,1,1);
 
-Mixer_Noise = Thermal + FlickerMixer';
+Filter_Noise = Thermal + FlickerDAC;
 Mixer_Output = Product + Mixer_Noise;
 end
