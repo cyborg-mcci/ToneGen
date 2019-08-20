@@ -139,20 +139,40 @@
 % Time = DAC_NormalisedTime_1/f_in;
 
 
-NoSamples = 2^22;
+NoSamples = 2^24;
 thn = 50e-12;
-fc_fln = 1000;
-k_fln = fc_fln * (thn^2);
+fc_fln = 1e6;
+k_fln = (fc_fln * (50e-12^2));
+
+sigma_thn = thn * sqrt(fs/2);
+var_fln = fc_fln * (thn^2) * log(NoSamples/2);
 
 ts = 1e-9;
 
-[Flicker, ~] = f_alpha(NoSamples, k_fln, 0.5, 1);
-Thermal = randn(1,NoSamples)*thn;
+[Flicker, ~] = f_alpha(NoSamples, var_fln, 1, 1);
+Thermal = (randn(1,NoSamples)*sigma_thn );
 
-%Noise = Flicker' + Thermal;
-Noise = Flicker';
 
+Noise = Thermal + Flicker';
+
+fs = 1/ts;
 t = 0:ts:(NoSamples-1)*ts;
+%Noise = 1* sin(2*pi*0.96462e6*t) + Noise;
 
-[DAC_Output_1_i_Spectrum, DACOutput_1_i_f_TS, PSD_OS, f_OS, DAC_Output_1_Window] = wall_fresp(Noise, t, @rectwin, 0);
-loglog(f_OS, db2mag(PSD_OS), f_OS, sqrt(k_fln./f_OS))
+
+figure(1), clf
+
+[DAC_Output_1_i_Spectrum, DACOutput_1_i_f_TS, PSD_OSwfre, f_OS, DAC_Output_1_Window] = wall_fresp(Noise, t, @blackman, 0);
+%loglog(f_OS, db2mag(PSD_OS), f_OS, sqrt(k_fln./f_OS))
+loglog(f_OS, db2mag(PSD_OSwfre), f_OS, sqrt(k_fln./f_OS))
+title('wall fresp')
+
+figure(2), clf
+
+Pxx = pwelch(Noise);
+PSD_OSpw = pow2db(Pxx);
+df = 4*fs / (NoSamples);
+f_OSpw = 0:df:fs/2;
+
+loglog(f_OSpw, db2mag(PSD_OSpw))
+title('pwelch')

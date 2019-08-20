@@ -1,4 +1,4 @@
-%% DualChannel.m
+%% DualCrectwinel.m
 %%  Microelectronic Circuits Centre Ireland (www.mcci.ie)
 % 
 %% 
@@ -14,7 +14,7 @@
 % 
 % *File Description:*
 % 
-% _Script modelling a low noise current source with dual channel DACs and 
+% _Script modelling a low noise current source with dual crectwinel DACs and 
 %   multiplication for uncorrelated noise cancelling_
 % 
 % 
@@ -51,7 +51,7 @@ num_bits = 16;
 fs = 50e6; % DAC Sample Frequency
 
 % Input signal parameters and coherent sampling condition
-NumSamples = 2^16;
+NumSamples = 2^22;
 f_in_desired= 50e3;
 NearestPrime = max(primes(f_in_desired*(NumSamples)/fs));
 f_in = fs*NearestPrime/(NumSamples);
@@ -132,7 +132,7 @@ xlabel('Time (s)')
 ylabel('DAC output 1 (Current)')
 title('DAC output 1 (A)')
 subplot(2,1,2)
-semilogx(DAC_Output_1_f_OS,PSD_DAC_Output_1_i)
+semilogx(DAC_Output_1_f_OS,db2mag(PSD_DAC_Output_1_i))
 xlabel('Frequency (Hz)')
 ylabel('PSD')
 
@@ -150,44 +150,44 @@ ylabel('PSD')
 % ylabel('PSD')
 
 
-% Creating two voltage channels
-Channel_1_v = DAC_Output_1_i*Converter_R;
-Channel_2_v = DAC_Output_2_i*Converter_R;
+% Creating two voltage crectwinels
+Crectwinel_1_v = DAC_Output_1_i*Converter_R;
+Crectwinel_2_v = DAC_Output_2_i*Converter_R;
 
 % Voltage signal
-[Channel_1_v_Spectrum, Channel_1_v_f_TS, PSD_Channel_1_v, Channel_1_v_f_OS, Channel_1_v_Window] = wall_fresp(Channel_1_v, Time, @rectwin, 0);
-% [Channel_2_v_Spectrum, Channel_2_v_f _TS, PSD_Channel_2_v, Channel_2_v_f _OS, Channel_2_v_Window] = wall_fresp(Channel_2_v, Time, @rectwin, 0);
+[Crectwinel_1_v_Spectrum, Crectwinel_1_v_f_TS, PSD_Crectwinel_1_v, Crectwinel_1_v_f_OS, Crectwinel_1_v_Window] = wall_fresp(Crectwinel_1_v, Time, @rectwin, 0);
+% [Crectwinel_2_v_Spectrum, Crectwinel_2_v_f _TS, PSD_Crectwinel_2_v, Crectwinel_2_v_f _OS, Crectwinel_2_v_Window] = wall_fresp(Crectwinel_2_v, Time, @rectwin, 0);
 
 
-% Plotting Channel 1 (V) in time and frequency domain (One-sided FFT)
+% Plotting Crectwinel 1 (V) in time and frequency domain (One-sided FFT)
 FigureCounter = FigureCounter + 1;
 figure(FigureCounter)
 clf
 subplot(2,1,1)
-plot(Time,Channel_1_v)
+plot(Time,Crectwinel_1_v)
 xlabel('Time (s)')
 ylabel('DAC output (Voltage)')
 title('DAC output (V)')
 subplot(2,1,2)
-semilogx(Channel_1_v_f_OS,PSD_Channel_1_v)
+semilogx(Crectwinel_1_v_f_OS,PSD_Crectwinel_1_v)
 xlabel('Frequency (Hz)')
 ylabel('PSD')
 
-% Channel 2
+% Crectwinel 2
 % subplot(4,1,3)
-% plot(Time,Channel_2_v)
+% plot(Time,Crectwinel_2_v)
 % xlabel('Time (s)')
 % ylabel('DAC output (Voltage)')
 % title('DAC output (V)')
 % subplot(4,1,4)
-% semilogx(Channel_2_f _OS,PSD_Channel_2_v)
+% semilogx(Crectwinel_2_f _OS,PSD_Crectwinel_2_v)
 % xlabel('Frequency (Hz)')
 % ylabel('PSD')
 
 
 % Filter output
-Filter_Output_1_v = Filtering(num_f1,den_f1,Channel_1_v,Time,FCornerFilter_1,Filter_TNoise_1_v);
-Filter_Output_2_v = Filtering(num_f1,den_f1,Channel_2_v,Time,FCornerFilter_1,Filter_TNoise_1_v);
+Filter_Output_1_v = Filtering(num_f1,den_f1,Crectwinel_1_v,Time,FCornerFilter_1,Filter_TNoise_1_v);
+Filter_Output_2_v = Filtering(num_f1,den_f1,Crectwinel_2_v,Time,FCornerFilter_1,Filter_TNoise_1_v);
 
 [Filter_Output_1_v_Spectrum, Filter_Output_1_v_f_TS, PSD_Filter_Output_1_v, Filter_Output_1_v_f_OS, Filter_Output_1_v_Window] = wall_fresp(Filter_Output_1_v, Time, @rectwin, 0);
 % [Filter_Output_2_v_Spectrum, Filter_Output_2_v_f_TS, PSD_Filter_Output_2_v, Filter_Output_2_v_f_OS, Filter_Output_2_v_Window] = wall_fresp(Filter_Output_2_v, Time, @rectwin, 0);
