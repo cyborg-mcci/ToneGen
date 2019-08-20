@@ -30,7 +30,7 @@ WindowedSignal = Signal .* Window;
 Spectrum = fft(WindowedSignal);
 
 % Accounting for Window gain
-Spectrum  = Spectrum ./ sqrt(sum(Window));
+%Spectrum  = Spectrum ./ sum(Window);
 
 % Calculating the 2-sided Frequency Vector
 f_TS = (0:SampleLength) * fs/SampleLength;
@@ -45,7 +45,7 @@ if(PlotFlag)
 end
 % Creating the One-Sided PSD
 OneSidedFFT = Spectrum(1:end/2+1);
-PSD_OS = (1/(fs)) * abs(OneSidedFFT).^2;
+PSD_OS = (1/(fs) * abs(OneSidedFFT).^2;
 PSD_OS(2:end-1) = 2 * PSD_OS(2:end-1);
 PSD_OSdB = 10*log10(PSD_OS);
 f_OS = (0:SampleLength/2) * fs/SampleLength;
