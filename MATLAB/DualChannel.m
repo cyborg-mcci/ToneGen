@@ -74,6 +74,7 @@ C_f1 = 1/(4*(pi^2)*(f_f1^2)*L_f1); %Capacitance
 num_f1 = [R_f1/L_f1 0]; %Transfer function numerator coefficients, in descending powers of s
 den_f1 = [1 R_f1/L_f1 1/(L_f1*C_f1)]; %Transfer function denominator coefficients, in descending powers of s
 filter_1 = tf(num_f1,den_f1); %Filter transfer function
+filter_1_ss = ss(filter_1);
 FCornerFilter_1 = 0; %Filter 1/f noise corner frequency
 Filter_TNoise_1_v = sqrt(4*k*Temperature*R_f1); %Filter thermal noise
 

@@ -5,6 +5,7 @@ function [Filtered] = Filtering(TFnum,TFden,Signal,Time,FCornerFilter,Filter_TNo
 kf_Filter = FCornerFilter*(Filter_TNoise^2);
 
 TransferFunction = tf(TFnum,TFden);
+TransferFunction_ss = ss(TransferFunction);
 
 Filter_Thermal = randn(1,length(Signal))*Filter_TNoise;
 [FilterFlicker,~] = f_alpha(length(Signal),kf_Filter,0.5,1);
@@ -15,5 +16,5 @@ Input = Signal + Filter_Noise;
 %s = tf('s')
 %TransferFunction = 1/(314.59265e3 + s);
 
-Filtered = lsim(TransferFunction,Input,Time)';
+Filtered = lsim(TransferFunction_ss,Input,Time)';
 end
