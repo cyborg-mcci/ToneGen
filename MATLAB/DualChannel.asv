@@ -67,7 +67,7 @@ Converter_R = 1e3; % Resistor at output of DAC to convert Current to voltage
 
 % Sample RLC filter at the DAC output: parameters
 f_f1 = f_in; % resonant frequency
-BW_f1 = 10000; %bandwidth
+BW_f1 = 1; %bandwidth
 L_f1 = 1e-3; %inductance 
 R_f1 = 2*pi*BW_f1*L_f1; %Resistance
 C_f1 = 1/(4*(pi^2)*(f_f1^2)*L_f1); %Capacitance

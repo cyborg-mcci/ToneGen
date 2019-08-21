@@ -139,40 +139,74 @@
 % Time = DAC_NormalisedTime_1/f_in;
 
 
-NoSamples = 2^24;
-thn = 50e-12;
-fc_fln = 1e6;
-k_fln = (fc_fln * (50e-12^2));
+% NoSamples = 2^24;
+% thn = 50e-12;
+% fc_fln = 1e6;
+% k_fln = (fc_fln * (50e-12^2));
+% 
+% sigma_thn = thn * sqrt(fs/2);
+% var_fln = fc_fln * (thn^2) * log(NoSamples/2);
+% 
+% ts = 1e-9;
+% 
+% [Flicker, ~] = f_alpha(NoSamples, var_fln, 1, 1);
+% Thermal = (randn(1,NoSamples)*sigma_thn );
+% 
+% 
+% Noise = Thermal + Flicker';
+% 
+% fs = 1/ts;
+% t = 0:ts:(NoSamples-1)*ts;
+% %Noise = 1* sin(2*pi*0.96462e6*t) + Noise;
+% 
+% 
+% figure(1), clf
+% 
+% [DAC_Output_1_i_Spectrum, DACOutput_1_i_f_TS, PSD_OSwfre, f_OS, DAC_Output_1_Window] = wall_fresp(Noise, t, @blackman, 0);
+% %loglog(f_OS, db2mag(PSD_OS), f_OS, sqrt(k_fln./f_OS))
+% loglog(f_OS, db2mag(PSD_OSwfre), f_OS, sqrt(k_fln./f_OS))
+% title('wall fresp')
+% 
+% figure(2), clf
+% 
+% Pxx = pwelch(Noise);
+% PSD_OSpw = pow2db(Pxx);
+% df = 4*fs / (NoSamples);
+% f_OSpw = 0:df:fs/2;
+% 
+% loglog(f_OSpw, db2mag(PSD_OSpw))
+% title('pwelch')
 
-sigma_thn = thn * sqrt(fs/2);
-var_fln = fc_fln * (thn^2) * log(NoSamples/2);
+%% Investigating the effects of Mixing on In-Phase Sinusoids
+clear all
 
-ts = 1e-9;
-
-[Flicker, ~] = f_alpha(NoSamples, var_fln, 1, 1);
-Thermal = (randn(1,NoSamples)*sigma_thn );
+NoSamples = 2^22;
 
 
-Noise = Thermal + Flicker';
+fs = NoSamples;
+Ts = 1/fs;
+t = 0:Ts:(NoSamples-1)*Ts; 
 
-fs = 1/ts;
-t = 0:ts:(NoSamples-1)*ts;
-%Noise = 1* sin(2*pi*0.96462e6*t) + Noise;
+In1 = 1 * sin(2*pi*10000*t);
+In2 = 1 * sin(2*pi*10000*t + (pi/180)*180);
 
+Out = In1 .* In2;
 
-figure(1), clf
+[~, ~, PSD_OS_In1, f_OS_In1, ~] = wall_fresp(In1, t, @hann, 0);
+[~, ~, PSD_OS_In2, f_OS_In2, ~] = wall_fresp(In2, t, @hann, 0);
+[~, ~, PSD_OS_Out, f_OS_Out, ~] = wall_fresp(Out, t, @hann, 0);
 
-[DAC_Output_1_i_Spectrum, DACOutput_1_i_f_TS, PSD_OSwfre, f_OS, DAC_Output_1_Window] = wall_fresp(Noise, t, @blackman, 0);
-%loglog(f_OS, db2mag(PSD_OS), f_OS, sqrt(k_fln./f_OS))
-loglog(f_OS, db2mag(PSD_OSwfre), f_OS, sqrt(k_fln./f_OS))
-title('wall fresp')
-
-figure(2), clf
-
-Pxx = pwelch(Noise);
-PSD_OSpw = pow2db(Pxx);
-df = 4*fs / (NoSamples);
-f_OSpw = 0:df:fs/2;
-
-loglog(f_OSpw, db2mag(PSD_OSpw))
-title('pwelch')
+figure(1) 
+clf
+subplot(211)
+plot(t, In1, t, In2, t, Out)
+legend('In1', 'In2', 'Out')
+grid on
+xlabel('Time (s)')
+ylabel('Amplitude')
+subplot(212)
+semilogx(f_OS_In1, PSD_OS_In1, f_OS_In2, PSD_OS_In2, f_OS_Out, PSD_OS_Out)
+grid on
+legend('In1', 'In2', 'Out')
+xlabel('Frequency (Hz)')
+ylabel('PSD (dB)')

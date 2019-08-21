@@ -11,5 +11,6 @@ var_Flicker = FCornerMixer*(TNoiseMixer^2)*log(length(Product)/2);
 [FlickerMixer,~] = f_alpha(length(Product),var_Flicker,1,1);
 
 Mixer_Noise = Thermal + FlickerMixer';
-Mixer_Output = Product + Mixer_Noise;
+%Mixer_Output = Product + Mixer_Noise;
+Mixer_Output = Product;
 end
