@@ -67,53 +67,37 @@ Converter_R = 1e3; % Resistor at output of DAC to convert Current to voltage
 
 % Sample RLC filter at the DAC output: parameters
 f_f1 = f_in; % resonant frequency
-BW_f1 = 1; %bandwidth
+BW_f1 = 50; %bandwidth
 L_f1 = 1e-3; %inductance 
-R_f1 = 2*pi*BW_f1*L_f1; %Resistance
+Rpar_f1 = 50e-3; %Parasitic resistance of the inductor
 C_f1 = 1/(4*(pi^2)*(f_f1^2)*L_f1); %Capacitance
-num_f1 = [R_f1/L_f1 0]; %Transfer function numerator coefficients, in descending powers of s
-den_f1 = [1 R_f1/L_f1 1/(L_f1*C_f1)]; %Transfer function denominator coefficients, in descending powers of s
+num_f1 = [1/(L_f1*C_f1)]; %Transfer function numerator coefficients, in descending powers of s
+den_f1 = [1 Rpar_f1/L_f1 1/(L_f1*C_f1)]; %Transfer function denominator coefficients, in descending powers of s
 filter_1 = tf(num_f1,den_f1); %Filter transfer function
 FCornerFilter_1 = 0; %Filter 1/f noise corner frequency
-Filter_TNoise_1_v = sqrt(4*k*Temperature*R_f1); %Filter thermal noise
+Filter_TNoise_1_v = sqrt(4*k*Temperature*Rpar_f1); %Filter thermal noise
 
 % Analog multiplier (Mixer) parameters: (HA-2556)
 FCorner_Mixer = 1e4; %1/f noise corner frequency - Estimated Value not in Datasheet?
 TNoise_Mixer_v = 0.15e-6; %specified at f = 1kHz (worst case) - Output Referred Noise
 
-% Sample RLC filter at the Mixer output: parameters
-% resonates at f1 = 2*f0 (as squared sine wave has double the input
-% frequency)
-f_f2 = 2*f_f1; %resonant frequency
-BW_f2 = 50; %bandwidth
-L_f2 = 1e-3; %inductance
-R_f2 = 2*pi*BW_f2*L_f2; %resistance
-C_f2 = 1/(4*(pi^2)*(f_f2^2)*L_f2); % capacitance
-Z_L = 1e3; % Load Impedance
-num_f2 = [R_f2/L_f2 0]; % transfer function numerator coefficients, in descending powers of s
-den_f2 = [1 R_f2/L_f2 1/(L_f2*C_f2)]; % transfer function denominator coefficients, in descending powers of s
-filter_2 = tf(num_f2,den_f2); %Filter transfer function
-FCornerFilter_2 = 0; % 1/f noise corner frequency
-Filter_TNoise_2_v = sqrt(4*k*Temperature*R_f2); %Filter thermal noise
-
-
 %Sample LC current-mode filter at Howland output
-f_f3 = f_f2;
-L_f3 = 1e-3;
-C_f3 = 1/(4*(pi^2)*(f_f3^2)*L_f3); %% MAKE SURE THIS IS CORRECT
-Rpar_f3 = 50e-3;
+f_f2 = 2*f_f1;
+L_f2 = 1e-3;
+C_f2 = 1/(4*(pi^2)*(f_f2^2)*L_f2); %% MAKE SURE THIS IS CORRECT
+Rpar_f2 = 50e-3;
 ZL = 1e4;
-num_f3 = [L_f3 Rpar_f3];
-den_f3 = [L_f3*C_f3*ZL (Rpar_f3*ZL*C_f3 + L_f3) (ZL + Rpar_f3)];
-filter_3 = tf(num_f3,den_f3);
-FCornerFilter_3 = 0;
-Filter_TNoise_3_i = sqrt(4*k*Temperature/Rpar_f3);
+num_f2 = [L_f2 Rpar_f2];
+den_f2 = [L_f2*C_f2*ZL (Rpar_f2*ZL*C_f2 + L_f2) (ZL + Rpar_f2)];
+filter_2= tf(num_f2,den_f2);
+FCornerFilter_2 = 0;
+Filter_TNoise_2_i = sqrt(4*k*Temperature/Rpar_f2);
 
 %% Model
-
+Phase_Shift = 0;
 % DAC Output, includes Converter_R noise 
-[DAC_Output_1_i,DAC_NormalisedTime_1] = DAC(FCornerDAC,FullScale_i,NearestPrime,num_bits,NumSamples,TNoiseDAC_i,Converter_R,Temperature,fs);
-[DAC_Output_2_i,DAC_NormalisedTime_2] = DAC(FCornerDAC,FullScale_i,NearestPrime,num_bits,NumSamples,TNoiseDAC_i,Converter_R,Temperature,fs);
+[DAC_Output_1_i,DAC_NormalisedTime_1] = DAC(FCornerDAC,FullScale_i,NearestPrime,num_bits,NumSamples,TNoiseDAC_i,fs,Phase_Shift);
+[DAC_Output_2_i,DAC_NormalisedTime_2] = DAC(FCornerDAC,FullScale_i,NearestPrime,num_bits,NumSamples,TNoiseDAC_i,fs,P);
 
 % Scaling time vector depending on the input frequency
 Time = DAC_NormalisedTime_1/f_in;
@@ -152,9 +136,9 @@ ylabel('PSD')
 % ylabel('PSD')
 
 
-% Creating two voltage channels
-Channel_1_v = DAC_Output_1_i*Converter_R;
-Channel_2_v = DAC_Output_2_i*Converter_R;
+% TIA to create two voltage channels
+Channel_1_v = TIA_Converter(DAC_Output_1_i,Converter_R,Temperature,e_n);
+Channel_2_v = TIA_Converter(DAC_Output_2_i,Converter_R,Temperature,e_n);
 
 % Voltage signal
 [Channel_1_v_Spectrum, Channel_1_v_f_TS, PSD_Channel_1_v, Channel_1_v_f_OS, Channel_1_v_Window] = wall_fresp(Channel_1_v, Time, @hann, 0);
@@ -188,8 +172,8 @@ ylabel('PSD')
 
 
 % Filter output
-Filter_Output_1_v = Filtering(num_f1,den_f1,Channel_1_v,Time,FCornerFilter_1,Filter_TNoise_1_v,fs);
-Filter_Output_2_v = Filtering(num_f1,den_f1,Channel_2_v,Time,FCornerFilter_1,Filter_TNoise_1_v,fs);
+Filter_Output_1_v = Filtering(num_f1,den_f1,Channel_1_v,Time,FCornerFilter_1,Filter_TNoise_1_v,fs,0);
+Filter_Output_2_v = Filtering(num_f1,den_f1,Channel_2_v,Time,FCornerFilter_1,Filter_TNoise_1_v,fs,0);
 
 [Filter_Output_1_v_Spectrum, Filter_Output_1_v_f_TS, PSD_Filter_Output_1_v, Filter_Output_1_v_f_OS, Filter_Output_1_v_Window] = wall_fresp(Filter_Output_1_v, Time, @hann, 0);
 % [Filter_Output_2_v_Spectrum, Filter_Output_2_v_f_TS, PSD_Filter_Output_2_v, Filter_Output_2_v_f_OS, Filter_Output_2_v_Window] = wall_fresp(Filter_Output_2_v, Time, @hann, 0);
@@ -247,38 +231,22 @@ title('Mixer output')
 subplot(2,1,2)
 semilogx(Mixer_f_OS,PSD_Mixer)
 
-
-% Bode plot of mixer filter's transfer function
-FigureCounter = FigureCounter + 1;
-figure(FigureCounter)
-clf
-options = bodeoptions;
-options.FreqUnits = 'Hz';
-bode(filter_2,options)
-title('Filter for Mixer output')
-
-
-% Mixer output after filtering
-Howland_Input_v = Filtering(num_f2,den_f2,Mixer_Output_v,Time,FCornerFilter_2,Filter_TNoise_2_v,fs);
-[Final_Spectrum, Final_f_TS, PSD_Final, Final_f_OS, Final_Window] = wall_fresp(Howland_Input_v, Time, @hann, 0);
-
-
 %Offsetting the squared sine wave to be centred at zero (need to fix this
 %to only subtract average of steady-state data)
-Mixer_Output_offset_v = detrend(Mixer_Output_v, 'constant');
+% Mixer_Output_offset_v = detrend(Mixer_Output_v, 'constant');
 
 
-% Plotting Howland input in time and frequency domain (One-sided FFT)
+% Plotting Mixer output(Howland input) in time and frequency domain (One-sided FFT)
 FigureCounter = FigureCounter + 1;
 figure(FigureCounter)
 clf
 subplot(2,1,1)
-plot(Time(length(Time)/2 +1:end),Howland_Input_v(length(Time)/2 +1:end))
+plot(Time(length(Time)/2 +1:end),Mixer_Output_v(length(Time)/2 +1:end))
 xlabel('Time')
 ylabel('Final Output (c1)')
 title('Final output')
 subplot(2,1,2)
-semilogx(Final_f_OS,PSD_Final)
+semilogx(Mixer_f_OS,PSD_Mixer)
 xlabel('Frequency(Hz)')
 ylabel('PSD')
 
@@ -314,7 +282,7 @@ Opampnoise = e_n*(R1 + R2)/(R1*R2B);
 TotalNoise = sqrt(ThermalNoise^2 + Opampnoise^2);
 
 %Vin applied to non-inverting input
-I_out_i = Howland_Input_v*(R2A + R2B)/(R1*R2B);
+I_out_i = Mixer_Output_v*(R2A + R2B)/(R1*R2B);
 
 %Vin applied to inverting input
 %Output_current_i = Howland_Input_v*(-R4)/(R3*R2B);

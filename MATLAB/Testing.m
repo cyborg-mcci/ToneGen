@@ -210,3 +210,5 @@ grid on
 legend('In1', 'In2', 'Out')
 xlabel('Frequency (Hz)')
 ylabel('PSD (dB)')
+
+
