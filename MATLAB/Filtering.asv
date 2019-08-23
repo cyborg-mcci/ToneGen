@@ -7,18 +7,10 @@ function [Filtered_Signal] = Filtering(TFnum,TFden,Signal,Time,FCornerFilter,TNo
 % descending powers of s) 
 %%% TFden - the transfer function denominator coefficients (specified in
 % descending powers of s) 
-%%% Signal - the input signal to be filtered 
-%%% Time - the signal's time vector
-%%% FCornerFIlter - the corner frequency of the filter 1/f noise (unit =
-% Hz)
-%%% TNoiseFilter - the filter's thermal noise (specified per sqrt(Hz))
-%%% fs - DAC sampling frequency
-%%% IO_Refer - an indicator to refer the noise to the input/output:
-% set IO_Refer = 0: Input-referred noise
-% set IO_Refer = 1: Output-referred noise
-
+%%% 
 %%%%OUTPUT PARAMETERS
-%%% Filtered_Signal - the filtered output signal 
+%%% DigitalOutput - A digitised sine wave (unit = A)
+%%% Normalised_Time = Normalised Time Vector
 
 TransferFunction = tf(TFnum,TFden);
 
