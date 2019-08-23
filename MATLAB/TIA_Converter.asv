@@ -4,12 +4,7 @@ function [DAC_Output_v] = TIA_Converter(Signal,Converter_R,Temperature,Op_Amp_No
 
 %%%% INPUT PARAMETERS
 %%% Signal - the current output of the DAC (unit = A)
-%%% Converter_R - the TIA resistor (unit = Ohms)
-%%% Temperature - the temperature (Unit = K)
-%%% Op_Amp_Noise - input-referred voltage noise density (V/sqrt(Hz))
-
-%%%%OUTPUT PARAMETERS
-%%% DAC_Output_v - the DAC output converted to a voltage 
+%%% Converter_R - the TIA
 
 global k;
 Resistor_Noise = randn(1,length(Signal))*sqrt(4*k*Temperature*Converter_R);
