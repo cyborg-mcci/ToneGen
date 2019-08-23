@@ -82,12 +82,11 @@ FCorner_Mixer = 1e4; %1/f noise corner frequency - Estimated Value not in Datash
 %TNoise_Mixer_v = 0.15e-6; %specified at f = 1kHz (worst case) - Output Referred Noise
 TNoise_Mixer_v = 0; 
 %Sample LC current-mode filter at Howland output
-f_f2 = 2*f_f1 * 2*pi*100; % **BODGE** formula for omega is incorrect, fix later
-L_f2 = 1e-9;
+f_f2 = 2*f_f1;
+L_f2 = 1e-3;
+C_f2 = 1/(4*(pi^2)*(f_f2^2)*L_f2); %% MAKE SURE THIS IS CORRECT
 Rpar_f2 = 50e-3;
 ZL = 1e4;
-C_f2 = 10*(2*pi)^2;
-%C_f2 = L_f2/((2*pi*f_f2)^2); % ** BODGE** 
 num_f2 = [L_f2 Rpar_f2];
 den_f2 = [L_f2*C_f2*ZL (Rpar_f2*ZL*C_f2 + L_f2) (ZL + Rpar_f2)];
 filter_2= tf(num_f2,den_f2);
@@ -326,39 +325,26 @@ Z_L = s*L_f2;
 
 Z_f2 = Z_C * Z_L / (Z_C+Z_L);
 
-TF_f2 = (Zo*Z_f2*ZL) / (Z_f2*ZL + Zo*ZL + Z_f2*Zo);
-Vout = lsim(TF_f2,I_out_i,Time)';
-TF = (s/s)/ZL;
-Iout_Final_i = lsim(TF, Vout, Time)';
+Vout = I_out_i * (Zo*Z_f2*ZL) / (Z_f2*ZL + ZO*ZL + Z_f2*ZO);
 
-[Iout_Spectrum, Iout_f_TS, PSD_Iout, Iout_f_OS, Iout_Window] = wall_fresp(Iout_Final_i, Time, @hann, 0);
-
-% Bode plot of DAC filter's transfer function, axis in Hz
-FigureCounter = FigureCounter + 1;
-figure(FigureCounter)
-clf
-options = bodeoptions;
-options.FreqUnits = 'Hz';
-bode(TF_f2)
-title('Current Filter')
+Iout_Final_i = Vout./ZL;
 
 % Plotting Howland output in time and frequency domain (One-sided FFT)
 FigureCounter = FigureCounter + 1;
 figure(FigureCounter)
 clf
 subplot(2,1,1)
-plot(Time,Iout_Final_i)
+plot(Time(length(Time)/2 +1:end),Mixer_Output_v(length(Time)/2 +1:end))
 xlabel('Time')
-ylabel('Howland Output (A)')
-title('Howland Output Current')
+ylabel('Final Output (c1)')
+title('Final output')
 subplot(2,1,2)
-semilogx(Iout_f_OS,PSD_Iout)
+semilogx(Mixer_f_OS,PSD_Mixer)
 xlabel('Frequency(Hz)')
-ylabel('PSD (dB)')
+ylabel('PSD')
 
 
-String = sprintf('SNR of Voltage Coming from the Howland: %f dB', snr(Iout_Final_i));
-disp(String)
+
 
 
 
