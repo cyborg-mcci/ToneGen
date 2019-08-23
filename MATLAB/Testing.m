@@ -188,7 +188,7 @@ Ts = 1/fs;
 t = 0:Ts:(NoSamples-1)*Ts; 
 
 In1 = 1 * sin(2*pi*10000*t);
-In2 = 1 * sin(2*pi*10000*t + (pi/180)*180);
+In2 = 1 * sin(2*pi*10050*t + (pi/180)*180);
 
 Out = In1 .* In2;
 
