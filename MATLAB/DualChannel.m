@@ -46,7 +46,7 @@ Temperature = 300; %Temperature in Kelvin
 % DAC parameters (ADI LTC1668)
 FCornerDAC = 1e4; %estimate; not in datasheet
 TNoiseDAC_i = 50e-12; %per sqrt(Hz) - Value from Datasheet
-FullScale_i = 10e-3; % Value from Datasheet - this is a pkpk value
+FullScale_i = 20e-3; % Value from Datasheet - this is a pkpk value
 num_bits = 16;
 fs = 50e6; % DAC Sample Frequency
 
@@ -67,7 +67,7 @@ Converter_R = 1e3; % Resistor at output of DAC to convert Current to voltage
 
 % Sample RLC filter at the DAC output: parameters
 f_f1 = f_in; % resonant frequency
-BW_f1 = 50; %bandwidth
+BW_f1 = 5000; %bandwidth
 L_f1 = 1e-3; %inductance 
 Rpar_f1 = 50e-3; %Parasitic resistance of the inductor
 C_f1 = 1/(4*(pi^2)*(f_f1^2)*L_f1); %Capacitance
@@ -117,11 +117,12 @@ ylabel('DAC output 1 (Current)')
 title('DAC output 1 (A)')
 subplot(2,1,2)
 semilogx(DAC_Output_1_f_OS,PSD_DAC_Output_1_i)
+grid on
 xlabel('Frequency (Hz)')
 ylabel('PSD')
 
-
-
+String = sprintf('SNR of Current Coming from DAC: %f dB', snr(DAC_Output_1_i));
+disp(String)
 % FigureCounter = FigureCounter + 1;
 % figure(FigureCounter)
 % clf
@@ -140,6 +141,9 @@ ylabel('PSD')
 Channel_1_v = TIA_Converter(DAC_Output_1_i,Converter_R,Temperature,e_n);
 Channel_2_v = TIA_Converter(DAC_Output_2_i,Converter_R,Temperature,e_n);
 
+String = sprintf('SNR of Voltage Coming from TIA: %f dB', snr(Channel_1_v));
+disp(String)
+
 % Voltage signal
 [Channel_1_v_Spectrum, Channel_1_v_f_TS, PSD_Channel_1_v, Channel_1_v_f_OS, Channel_1_v_Window] = wall_fresp(Channel_1_v, Time, @hann, 0);
 % [Channel_2_v_Spectrum, Channel_2_v_f _TS, PSD_Channel_2_v, Channel_2_v_f _OS, Channel_2_v_Window] = wall_fresp(Channel_2_v, Time, @hann, 0);
@@ -151,11 +155,13 @@ figure(FigureCounter)
 clf
 subplot(2,1,1)
 plot(Time,Channel_1_v)
+grid on
 xlabel('Time (s)')
-ylabel('DAC output (Voltage)')
-title('DAC output (V)')
+ylabel('TIA output (Voltage)')
+title('TIA output (V)')
 subplot(2,1,2)
 semilogx(Channel_1_v_f_OS,PSD_Channel_1_v)
+grid on
 xlabel('Frequency (Hz)')
 ylabel('PSD')
 
@@ -178,6 +184,9 @@ Filter_Output_2_v = Filtering(num_f1,den_f1,Channel_2_v,Time,FCornerFilter_1,Fil
 [Filter_Output_1_v_Spectrum, Filter_Output_1_v_f_TS, PSD_Filter_Output_1_v, Filter_Output_1_v_f_OS, Filter_Output_1_v_Window] = wall_fresp(Filter_Output_1_v, Time, @hann, 0);
 % [Filter_Output_2_v_Spectrum, Filter_Output_2_v_f_TS, PSD_Filter_Output_2_v, Filter_Output_2_v_f_OS, Filter_Output_2_v_Window] = wall_fresp(Filter_Output_2_v, Time, @hann, 0);
 
+String = sprintf('SNR of Voltage Coming from the Bandpass Filter: %f dB', snr(Filter_Output_1_v));
+disp(String)
+
 % SettlingTime = stepinfo(sys,'SettlingTimeThreshold',0.005);
 
 % Plotting Filter output in time and frequency domain (One-sided
@@ -189,11 +198,13 @@ figure(FigureCounter)
 clf
 subplot(2,1,1)
 plot(Time,Filter_Output_1_v)
+grid on
 xlabel('Time')
 ylabel('Filter Output (c1)')
 title('Filter output 1')
 subplot(2,1,2)
 semilogx(Filter_Output_1_v_f_OS,PSD_Filter_Output_1_v)
+grid on
 
 % FigureCounter = FigureCounter + 1;
 % figure(FigureCounter)
