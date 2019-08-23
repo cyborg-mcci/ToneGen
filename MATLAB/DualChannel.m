@@ -67,9 +67,9 @@ Converter_R = 1e3; % Resistor at output of DAC to convert Current to voltage
 
 % Sample RLC filter at the DAC output: parameters
 f_f1 = f_in; % resonant frequency
-BW_f1 = 5000; %bandwidth
+BW_f1 = 500; %bandwidth
 L_f1 = 1e-3; %inductance 
-Rpar_f1 = 50e-3; %Parasitic resistance of the inductor
+Rpar_f1 = 2*pi*L_f1*BW_f1; %Parasitic resistance of the inductor
 C_f1 = 1/(4*(pi^2)*(f_f1^2)*L_f1); %Capacitance
 num_f1 = [1/(L_f1*C_f1)]; %Transfer function numerator coefficients, in descending powers of s
 den_f1 = [1 Rpar_f1/L_f1 1/(L_f1*C_f1)]; %Transfer function denominator coefficients, in descending powers of s
@@ -79,8 +79,8 @@ Filter_TNoise_1_v = sqrt(4*k*Temperature*Rpar_f1); %Filter thermal noise
 
 % Analog multiplier (Mixer) parameters: (HA-2556)
 FCorner_Mixer = 1e4; %1/f noise corner frequency - Estimated Value not in Datasheet?
-TNoise_Mixer_v = 0.15e-6; %specified at f = 1kHz (worst case) - Output Referred Noise
-
+%TNoise_Mixer_v = 0.15e-6; %specified at f = 1kHz (worst case) - Output Referred Noise
+TNoise_Mixer_v = 0; 
 %Sample LC current-mode filter at Howland output
 f_f2 = 2*f_f1;
 L_f2 = 1e-3;
@@ -176,6 +176,8 @@ ylabel('PSD')
 % xlabel('Frequency (Hz)')
 % ylabel('PSD')
 
+% ** FILTER BODGE** Remove later
+num_f1 = num_f1/100;
 
 % Filter output
 Filter_Output_1_v = Filtering(num_f1,den_f1,Channel_1_v,Time,FCornerFilter_1,Filter_TNoise_1_v,fs,0);
@@ -184,14 +186,22 @@ Filter_Output_2_v = Filtering(num_f1,den_f1,Channel_2_v,Time,FCornerFilter_1,Fil
 [Filter_Output_1_v_Spectrum, Filter_Output_1_v_f_TS, PSD_Filter_Output_1_v, Filter_Output_1_v_f_OS, Filter_Output_1_v_Window] = wall_fresp(Filter_Output_1_v, Time, @hann, 0);
 % [Filter_Output_2_v_Spectrum, Filter_Output_2_v_f_TS, PSD_Filter_Output_2_v, Filter_Output_2_v_f_OS, Filter_Output_2_v_Window] = wall_fresp(Filter_Output_2_v, Time, @hann, 0);
 
-String = sprintf('SNR of Voltage Coming from the Bandpass Filter: %f dB', snr(Filter_Output_1_v));
-disp(String)
 
-% SettlingTime = stepinfo(sys,'SettlingTimeThreshold',0.005);
+% ** BODGE** Trimming data to remove settling effects
+N = log2(NumSamples);
+NumSamples = 2^(N-1);
+Time = Time(end-(2^(N-1))+1:end);
+Filter_Output_1_v = Filter_Output_1_v(end-(2^(N-1))+1:end);
+Filter_Output_2_v = Filter_Output_2_v(end-(2^(N-1))+1:end);
+
 
 % Plotting Filter output in time and frequency domain (One-sided
 % FFT),removing transient from time domain output by only plotting the
 % second half of the data
+
+String = sprintf('SNR of Voltage Coming from the Bandpass Filter: %f dB', snr(Filter_Output_1_v));
+disp(String)
+
 
 FigureCounter = FigureCounter + 1;
 figure(FigureCounter)
@@ -224,13 +234,21 @@ figure(FigureCounter)
 clf
 options = bodeoptions;
 options.FreqUnits = 'Hz';
-bode(filter_1,options)
+bode(filter_1/100,options)
 title('Filter for the DAC output')
 
 Mixer_Output_v = Mixer(Filter_Output_1_v,Filter_Output_2_v,TNoise_Mixer_v,FCorner_Mixer,fs);
 [Mixer_Spectrum, Mixer_f_TS, PSD_Mixer, Mixer_f_OS, Mixer_Window] = wall_fresp(Mixer_Output_v, Time, @hann, 0);
 
+%** BODGE** Adding gain to mixer of 0.1 and removing DC offset
+Mixer_Output_v = Mixer_Output_v * 0.1;
+Mixer_Output_v  = detrend(Mixer_Output_v);
 % Plotting Mixer output in time and frequency domain (One-sided FFT)
+
+String = sprintf('SNR of Voltage Coming from the Mixer: %f dB', snr(Mixer_Output_v));
+disp(String)
+
+
 FigureCounter = FigureCounter + 1;
 figure(FigureCounter)
 clf
