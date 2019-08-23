@@ -18,7 +18,7 @@ function [DAC_Output,DAC_NormalisedTime] = DAC(FCornerDAC,FullScale,NearestPrime
 
 sample_cycle_ratio = NearestPrime/NumSamples;
 
-[Dig_Out,DAC_NormalisedTime] = ADC(sample_cycle_ratio,FullScale,num_bits,NearestPrime,Phase_Shift);
+[Dig_Out,DAC_NormalisedTime] = Digitiser(sample_cycle_ratio,FullScale,num_bits,NearestPrime,Phase_Shift);
 
 sigma_Thermal = TNoiseDAC*sqrt(fs/2);
 Thermal = randn(1,NumSamples)*sigma_Thermal;
