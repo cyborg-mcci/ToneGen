@@ -44,7 +44,7 @@ k = physconst('Boltzmann'); %Boltzmann's constant
 Temperature = 300; %Temperature in Kelvin
 
 % DAC parameters (ADI LTC1668)
-FCornerDAC = 1e4; %estimate; not in datasheet
+FCornerDAC = 0; %estimate; not in datasheet
 TNoiseDAC_i = 50e-12; %per sqrt(Hz) - Value from Datasheet
 FullScale_i = 20e-3; % Value from Datasheet - this is a pkpk value
 num_bits = 16;
@@ -236,6 +236,7 @@ options = bodeoptions;
 options.FreqUnits = 'Hz';
 bode(filter_1/100,options)
 title('Filter for the DAC output')
+
 
 Mixer_Output_v = Mixer(Filter_Output_1_v,Filter_Output_2_v,TNoise_Mixer_v,FCorner_Mixer,fs);
 [Mixer_Spectrum, Mixer_f_TS, PSD_Mixer, Mixer_f_OS, Mixer_Window] = wall_fresp(Mixer_Output_v, Time, @hann, 0);
